@@ -19,7 +19,7 @@ function AppShell() {
       <TabBar active={tab} onChange={setTab} />
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-5">
         {error && (
-          <div className="mb-4 rounded-lg bg-red-100 text-red-700 px-4 py-2 text-sm">
+          <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2 text-sm">
             {error}
           </div>
         )}

@@ -16,27 +16,29 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 
+// A muted, "modern dark UI" palette — same hue families as before so categories stay
+// recognizable, but desaturated so the app doesn't read as a wall of bright colors.
 export const DEFAULT_CATEGORIES = [
-  { id: "rent", label: "Rent", badgeColor: "#5b3a8e", icon: Home },
-  { id: "provision", label: "Provision", badgeColor: "#1f7a6c", icon: ShoppingBasket },
-  { id: "utility", label: "Utility", badgeColor: "#e8a23d", icon: Lightbulb },
-  { id: "gift", label: "Gift", badgeColor: "#ff6b5e", icon: Gift },
-  { id: "grocery", label: "Grocery", badgeColor: "#3f9142", icon: ShoppingCart },
-  { id: "shopping", label: "Shopping", badgeColor: "#d6558c", icon: Shirt },
-  { id: "eating-out", label: "Eating Out", badgeColor: "#e25c45", icon: UtensilsCrossed },
-  { id: "travel", label: "Travel", badgeColor: "#2c8fbf", icon: Plane },
-  { id: "transport", label: "Transport", badgeColor: "#4a6fa5", icon: Bus },
-  { id: "health", label: "Health", badgeColor: "#c0392b", icon: HeartPulse },
-  { id: "savings", label: "Savings", badgeColor: "#1f7a6c", icon: PiggyBank, isFloorGoal: true },
-  { id: "investment", label: "Investment", badgeColor: "#2e7d32", icon: TrendingUp, isFloorGoal: true },
-  { id: "subscriptions", label: "Subscriptions", badgeColor: "#8e44ad", icon: Repeat },
-  { id: "personal", label: "Personal", badgeColor: "#e67e22", icon: User },
-  { id: "others", label: "Others", badgeColor: "#7f8c8d", icon: MoreHorizontal },
+  { id: "rent", label: "Rent", badgeColor: "#7c6a9c", icon: Home },
+  { id: "provision", label: "Provision", badgeColor: "#4a8a7d", icon: ShoppingBasket },
+  { id: "utility", label: "Utility", badgeColor: "#c9974f", icon: Lightbulb },
+  { id: "gift", label: "Gift", badgeColor: "#c97b6e", icon: Gift },
+  { id: "grocery", label: "Grocery", badgeColor: "#6b9e6d", icon: ShoppingCart },
+  { id: "shopping", label: "Shopping", badgeColor: "#b56b8a", icon: Shirt },
+  { id: "eating-out", label: "Eating Out", badgeColor: "#bd6a58", icon: UtensilsCrossed },
+  { id: "travel", label: "Travel", badgeColor: "#5490ab", icon: Plane },
+  { id: "transport", label: "Transport", badgeColor: "#5f7a9e", icon: Bus },
+  { id: "health", label: "Health", badgeColor: "#a15048", icon: HeartPulse },
+  { id: "savings", label: "Savings", badgeColor: "#5a9188", icon: PiggyBank, isFloorGoal: true },
+  { id: "investment", label: "Investment", badgeColor: "#5c8f60", icon: TrendingUp, isFloorGoal: true },
+  { id: "subscriptions", label: "Subscriptions", badgeColor: "#8067a0", icon: Repeat },
+  { id: "personal", label: "Personal", badgeColor: "#c48752", icon: User },
+  { id: "others", label: "Others", badgeColor: "#7d8590", icon: MoreHorizontal },
 ];
 
 const FALLBACK_COLORS = [
-  "#ff6b5e", "#1f7a6c", "#e8a23d", "#5b3a8e", "#3f9142",
-  "#2c8fbf", "#d6558c", "#c0392b", "#8e44ad", "#4a6fa5",
+  "#c97b6e", "#4a8a7d", "#c9974f", "#7c6a9c", "#6b9e6d",
+  "#5490ab", "#b56b8a", "#a15048", "#8067a0", "#5f7a9e",
 ];
 
 export function colorForNewCategory(existingCount) {

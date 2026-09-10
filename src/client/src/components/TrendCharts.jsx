@@ -13,17 +13,20 @@ import {
 import Card from "./Card.jsx";
 
 const COLORS = {
-  income: "#1f7a6c",
-  expenses: "#ff6b5e",
-  savings: "#e8a23d",
-  investment: "#5b3a8e",
+  income: "#4a9186",
+  expenses: "#c9776b",
+  savings: "#c99a52",
+  investment: "#8a76ac",
 };
+const GRID_COLOR = "#2d2d36";
+const AXIS_TICK = { fontSize: 12, fill: "#8b8b96" };
+const LEGEND_STYLE = { fontSize: 12, color: "#b8b8c2" };
 
 function CurrencyTooltip({ active, payload, label, currency }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white rounded-lg shadow-soft px-3 py-2 text-xs border border-mist">
-      <p className="font-semibold mb-1">{label}</p>
+    <div className="bg-surface2 rounded-lg shadow-soft px-3 py-2 text-xs border border-mist">
+      <p className="font-semibold mb-1 text-ink">{label}</p>
       {payload.map((p) => (
         <p key={p.dataKey} style={{ color: p.color }}>
           {p.name}: {currency}
@@ -40,11 +43,11 @@ export function IncomeExpenseTrendChart({ data, currency }) {
       <h3 className="font-bold mb-3">Income vs. expenses by month</h3>
       <ResponsiveContainer width="100%" height={240}>
         <BarChart data={data} margin={{ left: 0, right: 10 }} barGap={4}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#eef0f6" vertical={false} />
-          <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-          <YAxis tick={{ fontSize: 12 }} width={50} />
-          <Tooltip content={<CurrencyTooltip currency={currency} />} cursor={{ fill: "#eef0f6" }} />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false} />
+          <XAxis dataKey="label" tick={AXIS_TICK} />
+          <YAxis tick={AXIS_TICK} width={50} />
+          <Tooltip content={<CurrencyTooltip currency={currency} />} cursor={{ fill: "#ffffff0d" }} />
+          <Legend wrapperStyle={LEGEND_STYLE} />
           <Bar dataKey="income" name="Income" fill={COLORS.income} radius={[4, 4, 0, 0]} />
           <Bar dataKey="expenses" name="Expenses" fill={COLORS.expenses} radius={[4, 4, 0, 0]} />
         </BarChart>
@@ -58,12 +61,12 @@ export function SavingsInvestmentTrendChart({ data, currency }) {
     <Card>
       <h3 className="font-bold mb-3">Savings &amp; investment growth over time</h3>
       <ResponsiveContainer width="100%" height={240}>
-        <LineChart data={data} margin={{ left: -10, right: 10 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#eef0f6" />
-          <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-          <YAxis tick={{ fontSize: 12 }} width={50} />
+        <LineChart data={data} margin={{ left: 0, right: 10 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} />
+          <XAxis dataKey="label" tick={AXIS_TICK} />
+          <YAxis tick={AXIS_TICK} width={50} />
           <Tooltip content={<CurrencyTooltip currency={currency} />} />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
+          <Legend wrapperStyle={LEGEND_STYLE} />
           <Line
             type="monotone"
             dataKey="savingsCumulative"

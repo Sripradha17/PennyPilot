@@ -109,7 +109,7 @@ export default function BudgetsPage() {
           }
 
           return (
-            <Card key={c.id} className="hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+            <Card key={c.id} className="hover:bg-surface2 hover:-translate-y-0.5 transition-all duration-200">
               <div className="flex items-center justify-between mb-2">
                 <CategoryBadge category={c} />
                 {editingId === c.id ? (

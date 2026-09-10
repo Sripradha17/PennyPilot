@@ -225,8 +225,8 @@ export default function ImportExpenses({ onClose }) {
   const showingReview = importedExpenses !== null;
 
   return (
-    <div className="fixed inset-0 bg-ink/50 flex items-center justify-center p-4 z-50 animate-backdrop-in">
-      <div className="bg-white rounded-2xl shadow-soft w-full max-w-4xl max-h-[85vh] flex flex-col animate-modal-in">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-backdrop-in">
+      <div className="bg-surface rounded-2xl shadow-soft w-full max-w-4xl max-h-[85vh] flex flex-col animate-modal-in">
         <div className="flex items-center justify-between px-5 py-4 border-b border-mist">
           <h2 className="font-bold text-lg">
             {showingReview ? "Review imported expenses" : "Import from Excel/CSV"}
@@ -444,7 +444,7 @@ function ExpenseTable({ rows, state, setState, settings, showMonth, categoryOpti
               <tr
                 key={r.key}
                 className={`border-b border-mist/60 ${!r.valid ? "opacity-40" : ""} ${
-                  isDup ? "bg-amber-50" : ""
+                  isDup ? "bg-amber-500/10" : ""
                 }`}
               >
                 <td className="py-1.5 pr-2">

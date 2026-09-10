@@ -62,6 +62,25 @@ export default function ExpensesPage() {
 
   const pagedExpenses = visibleExpenses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  // Group into day sections when sorted chronologically — reads like a real transaction
+  // feed instead of repeating the same date on every row. Amount-sorted views stay flat
+  // since a day grouping wouldn't be contiguous there.
+  const dayGroups = useMemo(() => {
+    if (sortBy !== "date-desc" && sortBy !== "date-asc") return null;
+    const groups = [];
+    let current = null;
+    for (const e of pagedExpenses) {
+      const dayKey = toInputDate(e.date);
+      if (!current || current.dayKey !== dayKey) {
+        current = { dayKey, date: e.date, rows: [], total: 0 };
+        groups.push(current);
+      }
+      current.rows.push(e);
+      current.total += e.amount;
+    }
+    return groups;
+  }, [pagedExpenses, sortBy]);
+
   const duplicateGroups = useMemo(() => findDuplicateGroups(expenses), [expenses]);
 
   const categoryById = useMemo(() => {
@@ -243,112 +262,79 @@ export default function ExpensesPage() {
           <p className="text-ink/50 text-sm py-6 text-center">No expenses logged yet.</p>
         ) : visibleExpenses.length === 0 ? (
           <p className="text-ink/50 text-sm py-6 text-center">No expenses match your search/filters.</p>
-        ) : (
-          <ul className="divide-y divide-mist">
-            {pagedExpenses.map((e) =>
-              editingId === e._id ? (
-                <li key={e._id} className="py-2.5">
-                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
-                    <input
-                      type="date"
-                      value={editForm.date}
-                      onChange={(ev) => setEditForm((f) => ({ ...f, date: ev.target.value }))}
-                      className="col-span-2 sm:col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
-                    />
-                    <select
-                      value={editForm.category}
-                      onChange={(ev) => setEditForm((f) => ({ ...f, category: ev.target.value }))}
-                      className="col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
-                    >
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      value={editForm.person}
-                      onChange={(ev) => setEditForm((f) => ({ ...f, person: ev.target.value }))}
-                      className="col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
-                    >
-                      <option value="mine">{settings.myLabel}</option>
-                      <option value="spouse">{settings.spouseLabel}</option>
-                    </select>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={editForm.amount}
-                      onChange={(ev) => setEditForm((f) => ({ ...f, amount: ev.target.value }))}
-                      className="col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Note"
-                      value={editForm.note}
-                      onChange={(ev) => setEditForm((f) => ({ ...f, note: ev.target.value }))}
-                      className="col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
-                    />
-                    <div className="col-span-2 sm:col-span-1 flex items-center gap-2">
-                      <button
-                        onClick={() => saveEdit(e._id)}
-                        className="flex items-center justify-center rounded bg-teal text-white p-1.5 hover:bg-teal/90"
-                        aria-label="Save"
-                      >
-                        <Check size={14} />
-                      </button>
-                      <button
-                        onClick={() => {
+        ) : dayGroups ? (
+          <div className="space-y-4">
+            {dayGroups.map((group) => (
+              <div key={group.dayKey}>
+                <div className="flex items-center justify-between px-1 mb-1">
+                  <span className="text-xs font-semibold text-ink/50 uppercase tracking-wide">
+                    {new Date(group.date).toLocaleDateString(undefined, {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                  <span className="text-xs font-medium text-ink/40">
+                    {settings.currency}
+                    {group.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <ul className="rounded-xl border border-mist/70 divide-y divide-mist overflow-hidden">
+                  {group.rows.map((e) =>
+                    editingId === e._id ? (
+                      <EditRow
+                        key={e._id}
+                        editForm={editForm}
+                        setEditForm={setEditForm}
+                        categories={categories}
+                        settings={settings}
+                        onSave={() => saveEdit(e._id)}
+                        onCancel={() => {
                           setEditingId(null);
                           setEditForm(null);
                         }}
-                        className="flex items-center justify-center rounded border border-mist p-1.5 hover:bg-mist/40"
-                        aria-label="Cancel"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              ) : (
-                <li
+                      />
+                    ) : (
+                      <ExpenseRow
+                        key={e._id}
+                        expense={e}
+                        category={categoryById[e.category]}
+                        settings={settings}
+                        onEdit={() => startEdit(e)}
+                        onDelete={() => removeExpense(e._id)}
+                      />
+                    )
+                  )}
+                </ul>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <ul className="rounded-xl border border-mist/70 divide-y divide-mist overflow-hidden">
+            {pagedExpenses.map((e) =>
+              editingId === e._id ? (
+                <EditRow
                   key={e._id}
-                  className="flex items-center justify-between py-2.5 gap-3 px-2 -mx-2 rounded-lg hover:bg-mist/50 transition-colors duration-150"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <CategoryBadge category={categoryById[e.category]} />
-                    <div className="min-w-0">
-                      <p className="text-sm text-ink/60">
-                        {new Date(e.date).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                        {" · "}
-                        {e.person === "spouse" ? settings.spouseLabel : settings.myLabel}
-                        {e.note ? ` · ${e.note}` : ""}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="font-semibold">
-                      {settings.currency}
-                      {e.amount.toLocaleString()}
-                    </span>
-                    <button
-                      onClick={() => startEdit(e)}
-                      className="text-ink/30 hover:text-plum transition"
-                      aria-label="Edit expense"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={() => removeExpense(e._id)}
-                      className="text-ink/30 hover:text-red-500 transition"
-                      aria-label="Delete expense"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </li>
+                  editForm={editForm}
+                  setEditForm={setEditForm}
+                  categories={categories}
+                  settings={settings}
+                  onSave={() => saveEdit(e._id)}
+                  onCancel={() => {
+                    setEditingId(null);
+                    setEditForm(null);
+                  }}
+                />
+              ) : (
+                <ExpenseRow
+                  key={e._id}
+                  expense={e}
+                  category={categoryById[e.category]}
+                  settings={settings}
+                  showDate
+                  onEdit={() => startEdit(e)}
+                  onDelete={() => removeExpense(e._id)}
+                />
               )
             )}
           </ul>
@@ -368,5 +354,101 @@ export default function ExpensesPage() {
         />
       )}
     </div>
+  );
+}
+
+function ExpenseRow({ expense: e, category, settings, showDate, onEdit, onDelete }) {
+  return (
+    <li className="flex items-center gap-3 py-2.5 px-3 hover:bg-mist/40 transition-colors duration-150">
+      <CategoryBadge category={category} />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-ink truncate">{e.note || category?.label || "Expense"}</p>
+        <p className="text-xs text-ink/50 truncate">
+          {showDate && (
+            <>
+              {new Date(e.date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+              {" · "}
+            </>
+          )}
+          {e.person === "spouse" ? settings.spouseLabel : settings.myLabel}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="font-semibold text-sm tabular-nums">
+          {settings.currency}
+          {e.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+        </span>
+        <button onClick={onEdit} className="text-ink/30 hover:text-plum transition" aria-label="Edit expense">
+          <Pencil size={15} />
+        </button>
+        <button onClick={onDelete} className="text-ink/30 hover:text-red-500 transition" aria-label="Delete expense">
+          <Trash2 size={15} />
+        </button>
+      </div>
+    </li>
+  );
+}
+
+function EditRow({ editForm, setEditForm, categories, settings, onSave, onCancel }) {
+  return (
+    <li className="py-2.5 px-3">
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+        <input
+          type="date"
+          value={editForm.date}
+          onChange={(ev) => setEditForm((f) => ({ ...f, date: ev.target.value }))}
+          className="col-span-2 sm:col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
+        />
+        <select
+          value={editForm.category}
+          onChange={(ev) => setEditForm((f) => ({ ...f, category: ev.target.value }))}
+          className="col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
+        >
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.label}
+            </option>
+          ))}
+        </select>
+        <select
+          value={editForm.person}
+          onChange={(ev) => setEditForm((f) => ({ ...f, person: ev.target.value }))}
+          className="col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
+        >
+          <option value="mine">{settings.myLabel}</option>
+          <option value="spouse">{settings.spouseLabel}</option>
+        </select>
+        <input
+          type="number"
+          step="0.01"
+          value={editForm.amount}
+          onChange={(ev) => setEditForm((f) => ({ ...f, amount: ev.target.value }))}
+          className="col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
+        />
+        <input
+          type="text"
+          placeholder="Note"
+          value={editForm.note}
+          onChange={(ev) => setEditForm((f) => ({ ...f, note: ev.target.value }))}
+          className="col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
+        />
+        <div className="col-span-2 sm:col-span-1 flex items-center gap-2">
+          <button
+            onClick={onSave}
+            className="flex items-center justify-center rounded bg-teal text-white p-1.5 hover:bg-teal/90"
+            aria-label="Save"
+          >
+            <Check size={14} />
+          </button>
+          <button
+            onClick={onCancel}
+            className="flex items-center justify-center rounded border border-mist p-1.5 hover:bg-mist/40"
+            aria-label="Cancel"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      </div>
+    </li>
   );
 }

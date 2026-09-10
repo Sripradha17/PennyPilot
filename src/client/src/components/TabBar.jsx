@@ -26,7 +26,7 @@ export default function TabBar({ active, onChange }) {
   }, []);
 
   return (
-    <nav className="sticky top-[64px] sm:top-[60px] z-10 bg-cream border-b border-mist shadow-sm">
+    <nav className="sticky top-[64px] sm:top-[60px] z-10 bg-surface border-b border-mist shadow-sm">
       <div
         ref={scrollRef}
         onScroll={updateFade}
@@ -51,7 +51,7 @@ export default function TabBar({ active, onChange }) {
         })}
       </div>
       {canScrollMore && (
-        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-cream to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-surface to-transparent" />
       )}
     </nav>
   );

@@ -37,8 +37,8 @@ export default function DuplicateExpenses({ groups, categories, settings, remove
   }
 
   return (
-    <div className="fixed inset-0 bg-ink/50 flex items-center justify-center p-4 z-50 animate-backdrop-in">
-      <div className="bg-white rounded-2xl shadow-soft w-full max-w-2xl max-h-[85vh] flex flex-col animate-modal-in">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-backdrop-in">
+      <div className="bg-surface rounded-2xl shadow-soft w-full max-w-2xl max-h-[85vh] flex flex-col animate-modal-in">
         <div className="flex items-center justify-between px-5 py-4 border-b border-mist">
           <h2 className="font-bold text-lg flex items-center gap-2">
             <AlertTriangle size={18} className="text-amber-500" />

@@ -18,7 +18,7 @@ export default function MonthNavigator() {
         {!isCurrentMonth && (
           <button
             onClick={goToCurrentMonth}
-            className="text-xs text-cream/80 underline hover:text-cream"
+            className="text-xs text-ink/60 underline hover:text-ink"
           >
             jump to current month
           </button>

@@ -124,8 +124,8 @@ export default function SettingsPage() {
         </form>
       </Card>
 
-      <Card className="border border-red-100">
-        <h2 className="font-bold text-lg mb-2 text-red-600 flex items-center gap-2">
+      <Card className="border border-red-500/30">
+        <h2 className="font-bold text-lg mb-2 text-red-400 flex items-center gap-2">
           <AlertTriangle size={18} /> Danger zone
         </h2>
         <p className="text-sm text-ink/60 mb-3">
@@ -135,7 +135,7 @@ export default function SettingsPage() {
         {!confirmReset ? (
           <button
             onClick={() => setConfirmReset(true)}
-            className="rounded-lg border border-red-300 text-red-600 text-sm font-medium px-4 py-2 hover:bg-red-50"
+            className="rounded-lg border border-red-500/40 text-red-400 text-sm font-medium px-4 py-2 hover:bg-red-500/10"
           >
             Reset all data
           </button>

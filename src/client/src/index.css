@@ -2,12 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Tells the browser to draw native widgets (date-picker icon, scrollbars, etc.)
+     with light-on-dark styling instead of defaulting to a light-theme look. */
+  color-scheme: dark;
+}
+
 body {
-  @apply bg-mist text-ink font-body;
+  background-color: #000000;
+  color: #e6e5ea;
+  @apply font-body;
 }
 
 h1, h2, h3, h4 {
   @apply font-display;
+}
+
+input, select, textarea {
+  background-color: #1d1d23;
+  color: #e6e5ea;
+}
+input::placeholder, textarea::placeholder {
+  color: #6b6b76;
 }
 
 ::-webkit-scrollbar {
@@ -15,7 +31,7 @@ h1, h2, h3, h4 {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c9cce0;
+  background: #35353f;
   border-radius: 8px;
 }
 
@@ -78,12 +94,12 @@ input[type="checkbox"] {
 /* Scroll-shadow hint for horizontally-scrollable tables: fades in a shadow on
    whichever edge still has more content, purely from scroll position (no JS). */
 .scroll-fade-x {
-  background: linear-gradient(to right, white 30%, rgba(255, 255, 255, 0)),
-    linear-gradient(to right, rgba(255, 255, 255, 0), white 70%) 100% 0,
-    linear-gradient(to right, rgba(28, 27, 41, 0.12), rgba(28, 27, 41, 0)),
-    linear-gradient(to left, rgba(28, 27, 41, 0.12), rgba(28, 27, 41, 0)) 100% 0;
+  background: linear-gradient(to right, #151519 30%, rgba(21, 21, 25, 0)),
+    linear-gradient(to right, rgba(21, 21, 25, 0), #151519 70%) 100% 0,
+    linear-gradient(to right, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0)),
+    linear-gradient(to left, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0)) 100% 0;
   background-repeat: no-repeat;
-  background-color: white;
+  background-color: #151519;
   background-size: 24px 100%, 24px 100%, 10px 100%, 10px 100%;
   background-attachment: local, local, scroll, scroll;
 }
