@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Trash2, Plus, Pencil, X, Check, Search, AlertTriangle, Upload } from "lucide-react";
+import { Trash2, Plus, Pencil, X, Check, Search, AlertTriangle, Upload, Repeat } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey, toInputDate, fromInputDate } from "../lib/month.js";
-import { findDuplicateGroups } from "../lib/duplicates.js";
+import { findDuplicateGroups, expenseSignature } from "../lib/duplicates.js";
+import { getMissingRecurringForMonth } from "../lib/recurring.js";
 import Card from "../components/Card.jsx";
 import CategoryBadge from "../components/CategoryBadge.jsx";
 import ImportExpenses from "../components/ImportExpenses.jsx";
@@ -11,7 +12,17 @@ import DuplicateExpenses from "../components/DuplicateExpenses.jsx";
 import Pagination from "../components/Pagination.jsx";
 
 export default function ExpensesPage() {
-  const { expenses, categories, settings, addExpense, updateExpense, removeExpense } = useData();
+  const {
+    expenses,
+    income,
+    categories,
+    settings,
+    addExpense,
+    bulkAddExpenses,
+    updateExpense,
+    removeExpense,
+    updateSettings,
+  } = useData();
   const { key } = useMonth();
   const [showImport, setShowImport] = useState(false);
   const [showDuplicates, setShowDuplicates] = useState(false);
@@ -31,13 +42,23 @@ export default function ExpensesPage() {
     amount: "",
     note: "",
     person: "mine",
+    isRecurring: false,
   });
   const [submitting, setSubmitting] = useState(false);
+  const [addingRecurring, setAddingRecurring] = useState(false);
 
   const monthExpenses = useMemo(
     () => expenses.filter((e) => monthKey(new Date(e.date)) === key),
     [expenses, key]
   );
+
+  const totals = useMemo(() => {
+    const totalExpenses = monthExpenses.reduce((s, e) => s + e.amount, 0);
+    const totalIncome = income
+      .filter((i) => monthKey(new Date(i.date)) === key)
+      .reduce((s, i) => s + i.amount, 0);
+    return { income: totalIncome, expenses: totalExpenses, diff: totalIncome - totalExpenses };
+  }, [monthExpenses, income, key]);
 
   const visibleExpenses = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -81,7 +102,39 @@ export default function ExpensesPage() {
     return groups;
   }, [pagedExpenses, sortBy]);
 
-  const duplicateGroups = useMemo(() => findDuplicateGroups(expenses), [expenses]);
+  const ignoredDuplicateSignatures = useMemo(
+    () => new Set(settings.ignoredDuplicateSignatures || []),
+    [settings.ignoredDuplicateSignatures]
+  );
+  const duplicateGroups = useMemo(
+    () => findDuplicateGroups(expenses, ignoredDuplicateSignatures),
+    [expenses, ignoredDuplicateSignatures]
+  );
+
+  async function handleKeepDuplicateGroup(group) {
+    const sig = expenseSignature(group[0].date, group[0].amount, group[0].note);
+    const next = [...(settings.ignoredDuplicateSignatures || []), sig];
+    await updateSettings({ ignoredDuplicateSignatures: next });
+  }
+
+  const dismissedRecurringMonths = settings.dismissedRecurringMonths || [];
+  const missingRecurring = useMemo(
+    () => (dismissedRecurringMonths.includes(key) ? [] : getMissingRecurringForMonth(expenses, key)),
+    [expenses, key, dismissedRecurringMonths]
+  );
+
+  async function handleAddAllRecurring() {
+    setAddingRecurring(true);
+    try {
+      await bulkAddExpenses(missingRecurring);
+    } finally {
+      setAddingRecurring(false);
+    }
+  }
+
+  async function handleDismissRecurring() {
+    await updateSettings({ dismissedRecurringMonths: [...dismissedRecurringMonths, key] });
+  }
 
   const categoryById = useMemo(() => {
     const map = {};
@@ -100,8 +153,9 @@ export default function ExpensesPage() {
         amount: parseFloat(form.amount),
         note: form.note,
         person: form.person,
+        isRecurring: form.isRecurring,
       });
-      setForm((f) => ({ ...f, amount: "", note: "" }));
+      setForm((f) => ({ ...f, amount: "", note: "", isRecurring: false }));
     } finally {
       setSubmitting(false);
     }
@@ -115,6 +169,7 @@ export default function ExpensesPage() {
       amount: String(e.amount),
       note: e.note || "",
       person: e.person || "mine",
+      isRecurring: !!e.isRecurring,
     });
   }
 
@@ -125,13 +180,34 @@ export default function ExpensesPage() {
       amount: parseFloat(editForm.amount) || 0,
       note: editForm.note,
       person: editForm.person,
+      isRecurring: editForm.isRecurring,
     });
     setEditingId(null);
     setEditForm(null);
   }
 
+  const fmt = (n) => `${settings.currency}${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+
   return (
     <div className="space-y-5">
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="text-center">
+          <p className="text-xs text-ink/50 uppercase">Income</p>
+          <p className="font-display font-bold text-lg text-teal">{fmt(totals.income)}</p>
+        </Card>
+        <Card className="text-center">
+          <p className="text-xs text-ink/50 uppercase">Expenses</p>
+          <p className="font-display font-bold text-lg text-coral">{fmt(totals.expenses)}</p>
+        </Card>
+        <Card className="text-center">
+          <p className="text-xs text-ink/50 uppercase">Difference</p>
+          <p className={`font-display font-bold text-lg ${totals.diff < 0 ? "text-coral" : "text-teal"}`}>
+            {totals.diff < 0 ? "-" : ""}
+            {fmt(Math.abs(totals.diff))}
+          </p>
+        </Card>
+      </div>
+
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <h2 className="font-bold text-lg">Log an expense</h2>
@@ -204,8 +280,48 @@ export default function ExpensesPage() {
           >
             <Plus size={16} /> Add
           </button>
+          <label className="col-span-full flex items-center gap-1.5 text-xs text-ink/60 -mt-1">
+            <input
+              type="checkbox"
+              checked={form.isRecurring}
+              onChange={(e) => setForm((f) => ({ ...f, isRecurring: e.target.checked }))}
+            />
+            <Repeat size={12} /> Repeats every month (same amount, same day) — I'll prompt you to add it in future months
+          </label>
         </form>
       </Card>
+
+      {missingRecurring.length > 0 && (
+        <Card className="border-teal/40 bg-teal/5">
+          <div className="flex items-start gap-3">
+            <Repeat size={18} className="text-teal shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-ink">
+                {missingRecurring.length} recurring transaction{missingRecurring.length !== 1 ? "s" : ""} look
+                missing this month
+              </p>
+              <p className="text-xs text-ink/60 mt-0.5">
+                {missingRecurring.map((m) => `${m.note || categoryById[m.category]?.label} (${settings.currency}${m.amount.toLocaleString()})`).join(", ")}
+              </p>
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={handleAddAllRecurring}
+                  disabled={addingRecurring}
+                  className="rounded-lg bg-teal text-white text-xs font-medium px-3 py-1.5 hover:bg-teal/90 disabled:opacity-50"
+                >
+                  {addingRecurring ? "Adding…" : `Add all ${missingRecurring.length}`}
+                </button>
+                <button
+                  onClick={handleDismissRecurring}
+                  className="rounded-lg border border-mist text-xs font-medium px-3 py-1.5 hover:bg-mist/40"
+                >
+                  Not this month
+                </button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       <Card>
         <h2 className="font-bold text-lg mb-3">This month's expenses</h2>
@@ -350,6 +466,7 @@ export default function ExpensesPage() {
           categories={categories}
           settings={settings}
           removeExpense={removeExpense}
+          onKeepGroup={handleKeepDuplicateGroup}
           onClose={() => setShowDuplicates(false)}
         />
       )}
@@ -362,7 +479,12 @@ function ExpenseRow({ expense: e, category, settings, showDate, onEdit, onDelete
     <li className="flex items-center gap-3 py-2.5 px-3 hover:bg-mist/40 transition-colors duration-150">
       <CategoryBadge category={category} />
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-ink truncate">{e.note || category?.label || "Expense"}</p>
+        <p className="text-sm font-medium text-ink truncate flex items-center gap-1.5">
+          {e.note || category?.label || "Expense"}
+          {e.isRecurring && (
+            <Repeat size={11} className="text-teal shrink-0" aria-label="Recurring" />
+          )}
+        </p>
         <p className="text-xs text-ink/50 truncate">
           {showDate && (
             <>
@@ -448,6 +570,14 @@ function EditRow({ editForm, setEditForm, categories, settings, onSave, onCancel
             <X size={14} />
           </button>
         </div>
+        <label className="col-span-2 sm:col-span-6 flex items-center gap-1.5 text-xs text-ink/60">
+          <input
+            type="checkbox"
+            checked={!!editForm.isRecurring}
+            onChange={(ev) => setEditForm((f) => ({ ...f, isRecurring: ev.target.checked }))}
+          />
+          <Repeat size={11} /> Repeats every month
+        </label>
       </div>
     </li>
   );

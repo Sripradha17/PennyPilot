@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { X, AlertTriangle } from "lucide-react";
+import { X, AlertTriangle, ShieldCheck } from "lucide-react";
 import { toInputDate } from "../lib/month.js";
 
-export default function DuplicateExpenses({ groups, categories, settings, removeExpense, onClose }) {
+export default function DuplicateExpenses({ groups, categories, settings, removeExpense, onKeepGroup, onClose }) {
   // Default: keep the first entry in each group, mark the rest for deletion.
   const [checked, setChecked] = useState(() => {
     const initial = {};
@@ -14,18 +14,39 @@ export default function DuplicateExpenses({ groups, categories, settings, remove
     return initial;
   });
   const [deleting, setDeleting] = useState(false);
+  const [keptIndexes, setKeptIndexes] = useState(() => new Set());
+  const [keepingIndex, setKeepingIndex] = useState(null);
 
-  const checkedCount = useMemo(() => Object.values(checked).filter(Boolean).length, [checked]);
+  const visibleGroups = useMemo(
+    () => groups.map((g, i) => ({ group: g, i })).filter(({ i }) => !keptIndexes.has(i)),
+    [groups, keptIndexes]
+  );
+
+  const checkedCount = useMemo(() => {
+    const visibleIds = new Set(visibleGroups.flatMap(({ group }) => group.map((e) => e._id)));
+    return Object.entries(checked).filter(([id, v]) => v && visibleIds.has(id)).length;
+  }, [checked, visibleGroups]);
 
   function toggle(id) {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
+  async function handleKeep(group, i) {
+    setKeepingIndex(i);
+    try {
+      await onKeepGroup(group);
+      setKeptIndexes((prev) => new Set(prev).add(i));
+    } finally {
+      setKeepingIndex(null);
+    }
+  }
+
   async function handleDelete() {
     setDeleting(true);
     try {
+      const visibleIds = new Set(visibleGroups.flatMap(({ group }) => group.map((e) => e._id)));
       const ids = Object.entries(checked)
-        .filter(([, v]) => v)
+        .filter(([id, v]) => v && visibleIds.has(id))
         .map(([id]) => id);
       for (const id of ids) {
         await removeExpense(id);
@@ -42,7 +63,7 @@ export default function DuplicateExpenses({ groups, categories, settings, remove
         <div className="flex items-center justify-between px-5 py-4 border-b border-mist">
           <h2 className="font-bold text-lg flex items-center gap-2">
             <AlertTriangle size={18} className="text-amber-500" />
-            {groups.length} possible duplicate group{groups.length !== 1 ? "s" : ""}
+            {visibleGroups.length} possible duplicate group{visibleGroups.length !== 1 ? "s" : ""}
           </h2>
           <button onClick={onClose} className="text-ink/40 hover:text-ink">
             <X size={20} />
@@ -52,14 +73,29 @@ export default function DuplicateExpenses({ groups, categories, settings, remove
         <div className="p-5 overflow-y-auto flex-1 space-y-4">
           <p className="text-xs text-ink/50">
             Same date, amount, and note. The first entry in each group is kept by default —
-            uncheck any you want to keep instead.
+            uncheck any you want to keep instead. If a group is actually two separate
+            transactions, hit "Not a duplicate" so it stops being flagged.
           </p>
-          {groups.map((group, i) => (
+          {visibleGroups.length === 0 && (
+            <p className="text-sm text-ink/50 text-center py-6">No duplicate groups left to review.</p>
+          )}
+          {visibleGroups.map(({ group, i }) => (
             <div key={i} className="rounded-lg border border-mist p-3">
-              <p className="text-xs text-ink/50 mb-2">
-                {toInputDate(group[0].date)} · {settings.currency}
-                {group[0].amount.toLocaleString()} · {group[0].note || "(no note)"}
-              </p>
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <p className="text-xs text-ink/50">
+                  {toInputDate(group[0].date)} · {settings.currency}
+                  {group[0].amount.toLocaleString()} · {group[0].note || "(no note)"}
+                </p>
+                <button
+                  onClick={() => handleKeep(group, i)}
+                  disabled={keepingIndex === i}
+                  className="shrink-0 flex items-center gap-1 rounded-md border border-mist text-xs font-medium px-2 py-1 text-ink/70 hover:text-teal hover:border-teal/50 disabled:opacity-50"
+                  title="These are separate transactions — stop flagging this as a duplicate"
+                >
+                  <ShieldCheck size={12} />
+                  {keepingIndex === i ? "Saving…" : "Not a duplicate"}
+                </button>
+              </div>
               <ul className="space-y-1.5">
                 {group.map((e) => (
                   <li key={e._id} className="flex items-center gap-2 text-sm">

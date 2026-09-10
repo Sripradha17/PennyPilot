@@ -18,12 +18,22 @@ router.get("/", async (req, res) => {
 
 router.put("/", async (req, res) => {
   const settings = await getOrCreateSettings();
-  const { currency, myLabel, spouseLabel, budgets, oneTimeBudgets } = req.body;
+  const {
+    currency,
+    myLabel,
+    spouseLabel,
+    budgets,
+    oneTimeBudgets,
+    ignoredDuplicateSignatures,
+    dismissedRecurringMonths,
+  } = req.body;
   if (currency !== undefined) settings.currency = currency;
   if (myLabel !== undefined) settings.myLabel = myLabel;
   if (spouseLabel !== undefined) settings.spouseLabel = spouseLabel;
   if (budgets !== undefined) settings.budgets = budgets;
   if (oneTimeBudgets !== undefined) settings.oneTimeBudgets = oneTimeBudgets;
+  if (ignoredDuplicateSignatures !== undefined) settings.ignoredDuplicateSignatures = ignoredDuplicateSignatures;
+  if (dismissedRecurringMonths !== undefined) settings.dismissedRecurringMonths = dismissedRecurringMonths;
   await settings.save();
   res.json(settings);
 });

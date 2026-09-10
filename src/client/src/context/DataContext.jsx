@@ -15,6 +15,8 @@ export function DataProvider({ children }) {
     spouseLabel: "Sudheendra",
     budgets: {},
     oneTimeBudgets: {},
+    ignoredDuplicateSignatures: [],
+    dismissedRecurringMonths: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,6 +39,8 @@ export function DataProvider({ children }) {
         spouseLabel: settingsData.spouseLabel,
         budgets: settingsData.budgets || {},
         oneTimeBudgets: settingsData.oneTimeBudgets || {},
+        ignoredDuplicateSignatures: settingsData.ignoredDuplicateSignatures || [],
+        dismissedRecurringMonths: settingsData.dismissedRecurringMonths || [],
       });
       setError(null);
     } catch (err) {
@@ -107,6 +111,8 @@ export function DataProvider({ children }) {
       spouseLabel: updated.spouseLabel,
       budgets: updated.budgets || {},
       oneTimeBudgets: updated.oneTimeBudgets || {},
+      ignoredDuplicateSignatures: updated.ignoredDuplicateSignatures || [],
+      dismissedRecurringMonths: updated.dismissedRecurringMonths || [],
     });
   }, [settings]);
 

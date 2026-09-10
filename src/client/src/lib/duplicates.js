@@ -10,10 +10,12 @@ export function expenseSignature(date, amount, note) {
   return `${d}|${amt}|${n}`;
 }
 
-export function findDuplicateGroups(expenses) {
+export function findDuplicateGroups(expenses, ignoredSignatures) {
+  const ignored = ignoredSignatures instanceof Set ? ignoredSignatures : new Set(ignoredSignatures);
   const groups = new Map();
   for (const e of expenses) {
     const sig = expenseSignature(e.date, e.amount, e.note);
+    if (ignored.has(sig)) continue;
     if (!groups.has(sig)) groups.set(sig, []);
     groups.get(sig).push(e);
   }
