@@ -1,4 +1,8 @@
-const BASE = "/api";
+// In production (GitHub Pages) the client and server are on different origins, so the
+// build needs an absolute API URL — set via the VITE_API_URL secret in the deploy workflow.
+// Local dev has no VITE_API_URL, so it falls back to the relative path Vite proxies to
+// localhost:5000 (see vite.config.js).
+const BASE = import.meta.env.VITE_API_URL || "/api";
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {

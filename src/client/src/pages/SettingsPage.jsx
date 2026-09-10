@@ -113,11 +113,11 @@ export default function SettingsPage() {
             placeholder="New category name"
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
-            className="flex-1 rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
+            className="flex-1 min-w-0 rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
           />
           <button
             type="submit"
-            className="flex items-center gap-1.5 rounded-lg bg-teal text-white text-sm font-medium px-3 py-2 hover:bg-teal/90"
+            className="shrink-0 flex items-center gap-1.5 rounded-lg bg-teal text-white text-sm font-medium px-3 py-2 hover:bg-teal/90"
           >
             <Plus size={16} /> Add
           </button>

@@ -66,3 +66,25 @@ src/
   income/expense summary.
 - **Settings** — currency symbol, income-person labels, custom categories, and a "reset all data"
   option.
+
+## Deployment
+
+GitHub Pages only serves static files, so the client and server deploy to two different
+places:
+
+- **Client → GitHub Pages.** `.github/workflows/deploy.yml` builds `src/client` and publishes
+  it automatically on every push to `main`. One-time setup: in the repo's **Settings → Pages**,
+  set Source to "GitHub Actions".
+- **Server → Render** (or any Node host). `render.yaml` at the repo root is a Render blueprint
+  for the API. In the [Render dashboard](https://dashboard.render.com), "New +" → "Blueprint",
+  connect this repo, and set the `MONGODB_URI` secret to your Atlas connection string. In
+  Atlas's **Network Access**, allow `0.0.0.0/0` — Render's free tier doesn't have a fixed
+  outbound IP, so you can't whitelist a single address.
+- **Wire them together.** Once the Render service is live, copy its URL (e.g.
+  `https://pennypilot-api.onrender.com`) and add it as a GitHub Actions secret named
+  `VITE_API_URL`, with `/api` appended (**Settings → Secrets and variables → Actions →
+  New repository secret**): `https://pennypilot-api.onrender.com/api`. Push to `main` (or
+  re-run the workflow) to rebuild the client against the live API.
+
+Render's free tier spins down after inactivity, so the first request after a while takes a
+few seconds to wake it back up.

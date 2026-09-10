@@ -134,18 +134,18 @@ export default function ExpensesPage() {
             </button>
           </div>
         </div>
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 sm:grid-cols-6 gap-3">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-6 gap-3">
           <input
             type="date"
             value={form.date}
             onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-            className="col-span-1 rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
+            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
             required
           />
           <select
             value={form.category}
             onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-            className="col-span-1 rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
+            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
           >
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
@@ -156,7 +156,7 @@ export default function ExpensesPage() {
           <select
             value={form.person}
             onChange={(e) => setForm((f) => ({ ...f, person: e.target.value }))}
-            className="col-span-1 rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
+            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
           >
             <option value="mine">{settings.myLabel}</option>
             <option value="spouse">{settings.spouseLabel}</option>
@@ -168,7 +168,7 @@ export default function ExpensesPage() {
             placeholder={`Amount (${settings.currency})`}
             value={form.amount}
             onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
-            className="col-span-1 rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
+            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
             required
           />
           <input
@@ -176,12 +176,12 @@ export default function ExpensesPage() {
             placeholder="Note (optional)"
             value={form.note}
             onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
-            className="col-span-1 rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
+            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
           />
           <button
             type="submit"
             disabled={submitting}
-            className="col-span-2 sm:col-span-1 flex items-center justify-center gap-1.5 rounded-lg bg-coral text-white font-medium px-3 py-2 text-sm hover:bg-coral/90 disabled:opacity-50"
+            className="flex items-center justify-center gap-1.5 rounded-lg bg-coral text-white font-medium px-3 py-2 text-sm hover:bg-coral/90 disabled:opacity-50"
           >
             <Plus size={16} /> Add
           </button>
@@ -192,8 +192,8 @@ export default function ExpensesPage() {
         <h2 className="font-bold text-lg mb-3">This month's expenses</h2>
 
         {monthExpenses.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <div className="relative flex-1 min-w-[160px]">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 mb-3">
+            <div className="relative sm:flex-1 sm:min-w-[160px]">
               <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink/30" />
               <input
                 type="text"
@@ -203,27 +203,29 @@ export default function ExpensesPage() {
                 className="w-full rounded-lg border border-mist pl-8 pr-3 py-1.5 text-sm focus:outline-coral"
               />
             </div>
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="rounded-lg border border-mist px-2 py-1.5 text-sm"
-            >
-              <option value="all">All categories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-            <select
-              value={filterPerson}
-              onChange={(e) => setFilterPerson(e.target.value)}
-              className="rounded-lg border border-mist px-2 py-1.5 text-sm"
-            >
-              <option value="all">Everyone</option>
-              <option value="mine">{settings.myLabel}</option>
-              <option value="spouse">{settings.spouseLabel}</option>
-            </select>
+            <div className="grid grid-cols-2 sm:flex gap-2">
+              <select
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className="rounded-lg border border-mist px-2 py-1.5 text-sm"
+              >
+                <option value="all">All categories</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={filterPerson}
+                onChange={(e) => setFilterPerson(e.target.value)}
+                className="rounded-lg border border-mist px-2 py-1.5 text-sm"
+              >
+                <option value="all">Everyone</option>
+                <option value="mine">{settings.myLabel}</option>
+                <option value="spouse">{settings.spouseLabel}</option>
+              </select>
+            </div>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -251,7 +253,7 @@ export default function ExpensesPage() {
                       type="date"
                       value={editForm.date}
                       onChange={(ev) => setEditForm((f) => ({ ...f, date: ev.target.value }))}
-                      className="col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
+                      className="col-span-2 sm:col-span-1 rounded border border-mist px-2 py-1.5 text-xs"
                     />
                     <select
                       value={editForm.category}

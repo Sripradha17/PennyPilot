@@ -1,7 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-export default defineConfig({
+// GitHub Pages serves this app from https://<user>.github.io/PennyPilot/, a subpath —
+// every asset URL needs that prefix in production builds. Local dev stays at "/".
+export default defineConfig(({ command }) => ({
+  base: command === "build" ? "/PennyPilot/" : "/",
   plugins: [react()],
   server: {
     port: 5180,
@@ -13,4 +16,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

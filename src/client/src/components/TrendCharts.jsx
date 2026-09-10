@@ -1,7 +1,7 @@
 import {
   ResponsiveContainer,
-  AreaChart,
-  Area,
+  BarChart,
+  Bar,
   LineChart,
   Line,
   XAxis,
@@ -37,33 +37,17 @@ function CurrencyTooltip({ active, payload, label, currency }) {
 export function IncomeExpenseTrendChart({ data, currency }) {
   return (
     <Card>
-      <h3 className="font-bold mb-3">Income vs. expenses (last {data.length} months)</h3>
+      <h3 className="font-bold mb-3">Income vs. expenses by month</h3>
       <ResponsiveContainer width="100%" height={240}>
-        <AreaChart data={data} margin={{ left: 0, right: 10 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#eef0f6" />
+        <BarChart data={data} margin={{ left: 0, right: 10 }} barGap={4}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#eef0f6" vertical={false} />
           <XAxis dataKey="label" tick={{ fontSize: 12 }} />
           <YAxis tick={{ fontSize: 12 }} width={50} />
-          <Tooltip content={<CurrencyTooltip currency={currency} />} />
+          <Tooltip content={<CurrencyTooltip currency={currency} />} cursor={{ fill: "#eef0f6" }} />
           <Legend wrapperStyle={{ fontSize: 12 }} />
-          <Area
-            type="monotone"
-            dataKey="income"
-            name="Income"
-            stroke={COLORS.income}
-            fill={COLORS.income}
-            fillOpacity={0.15}
-            strokeWidth={2}
-          />
-          <Area
-            type="monotone"
-            dataKey="expenses"
-            name="Expenses"
-            stroke={COLORS.expenses}
-            fill={COLORS.expenses}
-            fillOpacity={0.15}
-            strokeWidth={2}
-          />
-        </AreaChart>
+          <Bar dataKey="income" name="Income" fill={COLORS.income} radius={[4, 4, 0, 0]} />
+          <Bar dataKey="expenses" name="Expenses" fill={COLORS.expenses} radius={[4, 4, 0, 0]} />
+        </BarChart>
       </ResponsiveContainer>
     </Card>
   );

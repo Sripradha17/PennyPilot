@@ -79,7 +79,7 @@ export default function IncomePage() {
 
       <Card>
         <h2 className="font-bold text-lg mb-3">Log income</h2>
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-5 gap-3">
           <input
             type="date"
             value={form.date}
