@@ -16,6 +16,28 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Bill-reminder push notifications, sent by the daily cron job.
+self.addEventListener("push", (event) => {
+  let data = { title: "Budget Raccoon", body: "You have a bill due tomorrow." };
+  try {
+    data = event.data.json();
+  } catch {
+    // fall back to the default above
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: `${self.registration.scope}icons/icon-192.png`,
+      badge: `${self.registration.scope}icons/icon-192.png`,
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(self.clients.openWindow(self.registration.scope));
+});
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;

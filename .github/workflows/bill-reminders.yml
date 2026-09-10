@@ -1,0 +1,16 @@
+name: Check bills due tomorrow
+
+on:
+  schedule:
+    # 13:00 UTC ≈ 9am US Eastern (adjust if your household is elsewhere)
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+
+jobs:
+  check-bills:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the check-bills endpoint
+        run: |
+          curl -sf "${{ secrets.API_BASE_URL }}/api/cron/check-bills" \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"

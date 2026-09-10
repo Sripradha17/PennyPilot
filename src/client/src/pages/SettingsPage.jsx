@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Plus, Trash2, AlertTriangle, LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, Trash2, AlertTriangle, LogOut, Bell, BellOff } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { colorForNewCategory } from "../lib/categories.js";
 import { clearToken } from "../lib/api.js";
+import { enableBillReminders, disableBillReminders, getBillReminderStatus } from "../lib/push.js";
 import Card from "../components/Card.jsx";
 import CategoryBadge from "../components/CategoryBadge.jsx";
 
@@ -25,6 +26,31 @@ export default function SettingsPage({ onLogout }) {
   const [newCategoryBudget, setNewCategoryBudget] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [pushStatus, setPushStatus] = useState("checking");
+  const [pushError, setPushError] = useState(null);
+  const [pushBusy, setPushBusy] = useState(false);
+
+  useEffect(() => {
+    getBillReminderStatus().then(setPushStatus);
+  }, []);
+
+  async function handleTogglePush() {
+    setPushBusy(true);
+    setPushError(null);
+    try {
+      if (pushStatus === "enabled") {
+        await disableBillReminders();
+        setPushStatus("disabled");
+      } else {
+        await enableBillReminders();
+        setPushStatus("enabled");
+      }
+    } catch (err) {
+      setPushError(err.message);
+    } finally {
+      setPushBusy(false);
+    }
+  }
 
   async function handleSaveGeneral(e) {
     e.preventDefault();
@@ -142,6 +168,42 @@ export default function SettingsPage({ onLogout }) {
             <Plus size={16} /> Add
           </button>
         </form>
+      </Card>
+
+      <Card>
+        <h2 className="font-bold text-lg mb-1 flex items-center gap-1.5">
+          {pushStatus === "enabled" ? <Bell size={17} className="text-teal" /> : <BellOff size={17} />}
+          Bill reminders
+        </h2>
+        <p className="text-xs text-ink/50 mb-3">
+          A push notification the day before any recurring bill is due — install the app to your
+          home screen first for this to work reliably.
+        </p>
+        {pushStatus === "unsupported" ? (
+          <p className="text-xs text-ink/50">Not supported on this device/browser.</p>
+        ) : pushStatus === "denied" ? (
+          <p className="text-xs text-ink/50">
+            Notifications are blocked for this site — enable them in your browser settings to turn
+            this on.
+          </p>
+        ) : (
+          <button
+            onClick={handleTogglePush}
+            disabled={pushBusy || pushStatus === "checking"}
+            className={`rounded-lg text-sm font-medium px-4 py-2 disabled:opacity-50 ${
+              pushStatus === "enabled"
+                ? "border border-mist hover:bg-mist/40"
+                : "bg-teal text-white hover:bg-teal/90"
+            }`}
+          >
+            {pushBusy
+              ? "Please wait…"
+              : pushStatus === "enabled"
+              ? "Turn off reminders"
+              : "Turn on reminders"}
+          </button>
+        )}
+        {pushError && <p className="text-xs text-red-400 mt-2">{pushError}</p>}
       </Card>
 
       <Card>

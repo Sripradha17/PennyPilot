@@ -89,4 +89,9 @@ export const api = {
   getBalances: () => request("/balances"),
   createBalance: (data) => request("/balances", { method: "POST", body: JSON.stringify(data) }),
   deleteBalance: (id) => request(`/balances/${id}`, { method: "DELETE" }),
+
+  subscribePush: (subscription) =>
+    request("/push/subscribe", { method: "POST", body: JSON.stringify({ subscription }) }),
+  unsubscribePush: (endpoint) =>
+    request("/push/unsubscribe", { method: "POST", body: JSON.stringify({ endpoint }) }),
 };
