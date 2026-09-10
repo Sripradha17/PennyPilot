@@ -83,9 +83,9 @@ export default function OverviewPage() {
                   <CategoryBadge category={category} />
                   <span className="text-sm font-semibold">
                     {settings.currency}
-                    {total.toLocaleString()}{" "}
+                    {total.toLocaleString(undefined, { maximumFractionDigits: 2 })}{" "}
                     <span className="text-ink/40 font-normal">
-                      ({totalExpenses > 0 ? Math.round((total / totalExpenses) * 100) : 0}%)
+                      ({totalExpenses > 0 ? ((total / totalExpenses) * 100).toFixed(2) : "0.00"}%)
                     </span>
                   </span>
                 </div>
