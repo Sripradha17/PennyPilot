@@ -10,6 +10,7 @@ import settingsRouter from "./routes/settings.js";
 import categoriesRouter from "./routes/categories.js";
 import resetRouter from "./routes/reset.js";
 import goalsRouter from "./routes/goals.js";
+import balancesRouter from "./routes/balances.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +27,7 @@ app.use("/api/settings", requireAuth, settingsRouter);
 app.use("/api/categories", requireAuth, categoriesRouter);
 app.use("/api/reset", requireAuth, resetRouter);
 app.use("/api/goals", requireAuth, goalsRouter);
+app.use("/api/balances", requireAuth, balancesRouter);
 
 connectDB()
   .then(() => {

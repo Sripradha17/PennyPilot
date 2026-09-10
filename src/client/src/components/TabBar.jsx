@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { LayoutDashboard, Receipt, Wallet, Target, Flag, Settings as SettingsIcon } from "lucide-react";
+import { LayoutDashboard, Receipt, Wallet, Target, Flag, Landmark, Settings as SettingsIcon } from "lucide-react";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -7,6 +7,7 @@ const TABS = [
   { id: "income", label: "Income", icon: Wallet },
   { id: "budgets", label: "Budgets", icon: Target },
   { id: "goals", label: "Goals", icon: Flag },
+  { id: "networth", label: "Net Worth", icon: Landmark },
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 

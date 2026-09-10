@@ -85,4 +85,8 @@ export const api = {
   createGoal: (data) => request("/goals", { method: "POST", body: JSON.stringify(data) }),
   updateGoal: (id, data) => request(`/goals/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteGoal: (id) => request(`/goals/${id}`, { method: "DELETE" }),
+
+  getBalances: () => request("/balances"),
+  createBalance: (data) => request("/balances", { method: "POST", body: JSON.stringify(data) }),
+  deleteBalance: (id) => request(`/balances/${id}`, { method: "DELETE" }),
 };
