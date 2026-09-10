@@ -7,11 +7,12 @@ import Settings from "../models/Settings.js";
 const router = Router();
 
 router.post("/", async (req, res) => {
+  const householdId = req.householdId;
   await Promise.all([
-    Expense.deleteMany({}),
-    Income.deleteMany({}),
-    Category.deleteMany({}),
-    Settings.deleteMany({}),
+    Expense.deleteMany({ householdId }),
+    Income.deleteMany({ householdId }),
+    Category.deleteMany({ householdId }),
+    Settings.deleteMany({ householdId }),
   ]);
   res.status(204).end();
 });

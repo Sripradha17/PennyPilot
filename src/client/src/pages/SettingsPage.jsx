@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Plus, Trash2, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, AlertTriangle, LogOut } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { colorForNewCategory } from "../lib/categories.js";
+import { clearToken } from "../lib/api.js";
 import Card from "../components/Card.jsx";
 import CategoryBadge from "../components/CategoryBadge.jsx";
 
-export default function SettingsPage() {
+export default function SettingsPage({ onLogout }) {
   const {
     settings,
     customCategories,
@@ -141,6 +142,18 @@ export default function SettingsPage() {
             <Plus size={16} /> Add
           </button>
         </form>
+      </Card>
+
+      <Card>
+        <button
+          onClick={() => {
+            clearToken();
+            onLogout();
+          }}
+          className="flex items-center gap-1.5 text-sm font-medium text-ink/70 hover:text-ink"
+        >
+          <LogOut size={15} /> Log out
+        </button>
       </Card>
 
       <Card className="border border-red-500/30">

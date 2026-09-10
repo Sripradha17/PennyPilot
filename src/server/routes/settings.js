@@ -3,21 +3,21 @@ import Settings from "../models/Settings.js";
 
 const router = Router();
 
-async function getOrCreateSettings() {
-  let settings = await Settings.findOne();
+async function getOrCreateSettings(householdId) {
+  let settings = await Settings.findOne({ householdId });
   if (!settings) {
-    settings = await Settings.create({});
+    settings = await Settings.create({ householdId });
   }
   return settings;
 }
 
 router.get("/", async (req, res) => {
-  const settings = await getOrCreateSettings();
+  const settings = await getOrCreateSettings(req.householdId);
   res.json(settings);
 });
 
 router.put("/", async (req, res) => {
-  const settings = await getOrCreateSettings();
+  const settings = await getOrCreateSettings(req.householdId);
   const {
     currency,
     myLabel,

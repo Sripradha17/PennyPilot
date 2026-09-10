@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 
 const settingsSchema = new mongoose.Schema({
+  householdId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Household",
+    required: true,
+    unique: true,
+  },
   currency: { type: String, default: "$" },
   myLabel: { type: String, default: "Sripradha" },
   spouseLabel: { type: String, default: "Sudheendra" },

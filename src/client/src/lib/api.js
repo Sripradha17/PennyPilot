@@ -3,12 +3,34 @@
 // Local dev has no VITE_API_URL, so it falls back to the relative path Vite proxies to
 // localhost:5000 (see vite.config.js).
 const BASE = import.meta.env.VITE_API_URL || "/api";
+const TOKEN_KEY = "pennypilot_token";
+
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setToken(token) {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
 
 async function request(path, options = {}) {
+  const token = getToken();
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...options,
   });
+  if (res.status === 401) {
+    clearToken();
+    window.dispatchEvent(new Event("pennypilot:unauthorized"));
+    throw new Error("Not logged in");
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`API ${path} failed: ${res.status} ${text}`);
@@ -17,7 +39,25 @@ async function request(path, options = {}) {
   return res.json();
 }
 
+async function authRequest(path, email, password) {
+  const res = await fetch(`${BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Request failed: ${res.status}`);
+  }
+  const { token } = await res.json();
+  setToken(token);
+  return token;
+}
+
 export const api = {
+  login: (email, password) => authRequest("/login", email, password),
+  signup: (email, password) => authRequest("/signup", email, password),
+
   getExpenses: () => request("/expenses"),
   createExpense: (data) => request("/expenses", { method: "POST", body: JSON.stringify(data) }),
   bulkCreateExpenses: (rows) =>
