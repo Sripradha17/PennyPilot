@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, AlertTriangle, Check } from "lucide-react";
+import { Plus, Trash2, AlertTriangle } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { colorForNewCategory } from "../lib/categories.js";
 import Card from "../components/Card.jsx";
@@ -24,8 +24,6 @@ export default function SettingsPage() {
   const [newCategoryBudget, setNewCategoryBudget] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [budgetEdits, setBudgetEdits] = useState({});
-  const [savingBudgetId, setSavingBudgetId] = useState(null);
 
   async function handleSaveGeneral(e) {
     e.preventDefault();
@@ -53,22 +51,6 @@ export default function SettingsPage() {
     }
     setNewCategoryName("");
     setNewCategoryBudget("");
-  }
-
-  async function handleSaveBudget(categoryId) {
-    const raw = budgetEdits[categoryId];
-    const amount = parseFloat(raw);
-    setSavingBudgetId(categoryId);
-    try {
-      await setBudget(categoryId, Number.isNaN(amount) ? 0 : amount);
-      setBudgetEdits((prev) => {
-        const next = { ...prev };
-        delete next[categoryId];
-        return next;
-      });
-    } finally {
-      setSavingBudgetId(null);
-    }
   }
 
   async function handleReset() {
@@ -116,58 +98,26 @@ export default function SettingsPage() {
       </Card>
 
       <Card>
-        <h2 className="font-bold text-lg mb-1">Categories</h2>
-        <p className="text-xs text-ink/50 mb-3">
-          Each category's budget allocation applies every month until you change it here again.
+        <h2 className="font-bold text-lg mb-3">Categories</h2>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {categories.map((c) => (
+            <div key={c.id} className="flex items-center gap-1">
+              <CategoryBadge category={c} />
+              {c.isCustom && (
+                <button
+                  onClick={() => removeCategory(c.id)}
+                  className="text-ink/30 hover:text-red-500"
+                  aria-label={`Delete ${c.label}`}
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-ink/50 mb-2">
+          Budget allocations are edited on the Budgets page.
         </p>
-        <ul className="space-y-1.5 mb-4">
-          {categories.map((c) => {
-            const isEditing = budgetEdits[c.id] !== undefined;
-            const currentBudget = settings.budgets?.[c.id] || 0;
-            return (
-              <li
-                key={c.id}
-                className="flex items-center gap-2 rounded-lg border border-mist px-2.5 py-1.5"
-              >
-                <div className="min-w-0 flex-1">
-                  <CategoryBadge category={c} />
-                </div>
-                <span className="text-xs text-ink/40 shrink-0">{settings.currency}</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={isEditing ? budgetEdits[c.id] : currentBudget || ""}
-                  placeholder="0"
-                  onChange={(e) =>
-                    setBudgetEdits((prev) => ({ ...prev, [c.id]: e.target.value }))
-                  }
-                  onKeyDown={(e) => e.key === "Enter" && handleSaveBudget(c.id)}
-                  className="w-20 shrink-0 rounded border border-mist px-2 py-1 text-xs focus:outline-coral"
-                />
-                {isEditing && (
-                  <button
-                    onClick={() => handleSaveBudget(c.id)}
-                    disabled={savingBudgetId === c.id}
-                    className="shrink-0 flex items-center justify-center rounded bg-teal text-white p-1 hover:bg-teal/90 disabled:opacity-50"
-                    aria-label={`Save budget for ${c.label}`}
-                  >
-                    <Check size={13} />
-                  </button>
-                )}
-                {c.isCustom && (
-                  <button
-                    onClick={() => removeCategory(c.id)}
-                    className="shrink-0 text-ink/30 hover:text-red-500"
-                    aria-label={`Delete ${c.label}`}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
         <form onSubmit={handleAddCategory} className="flex flex-wrap gap-2">
           <input
             placeholder="New category name"
