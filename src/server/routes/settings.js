@@ -20,6 +20,7 @@ router.put("/", async (req, res) => {
   const settings = await getOrCreateSettings(req.householdId);
   const {
     currency,
+    baseCurrencyCode,
     myLabel,
     spouseLabel,
     budgets,
@@ -28,6 +29,7 @@ router.put("/", async (req, res) => {
     dismissedRecurringMonths,
   } = req.body;
   if (currency !== undefined) settings.currency = currency;
+  if (baseCurrencyCode !== undefined) settings.baseCurrencyCode = baseCurrencyCode;
   if (myLabel !== undefined) settings.myLabel = myLabel;
   if (spouseLabel !== undefined) settings.spouseLabel = spouseLabel;
   if (budgets !== undefined) settings.budgets = budgets;

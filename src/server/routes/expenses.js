@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const { date, category, amount, note, person, isRecurring } = req.body;
+  const { date, category, amount, note, person, isRecurring, foreignCurrency, foreignAmount } = req.body;
   const expense = await Expense.create({
     date,
     category,
@@ -17,6 +17,8 @@ router.post("/", async (req, res) => {
     note,
     person,
     isRecurring,
+    foreignCurrency,
+    foreignAmount,
     householdId: req.householdId,
   });
   res.status(201).json(expense);
@@ -27,13 +29,15 @@ router.post("/bulk", async (req, res) => {
   if (!Array.isArray(rows) || rows.length === 0) {
     return res.status(400).json({ error: "rows must be a non-empty array" });
   }
-  const docs = rows.map(({ date, category, amount, note, person, isRecurring }) => ({
+  const docs = rows.map(({ date, category, amount, note, person, isRecurring, foreignCurrency, foreignAmount }) => ({
     date,
     category,
     amount,
     note,
     person,
     isRecurring,
+    foreignCurrency,
+    foreignAmount,
     householdId: req.householdId,
   }));
   const created = await Expense.insertMany(docs);
@@ -41,7 +45,7 @@ router.post("/bulk", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  const { date, category, amount, note, person, isRecurring } = req.body;
+  const { date, category, amount, note, person, isRecurring, foreignCurrency, foreignAmount } = req.body;
   const update = {};
   if (date !== undefined) update.date = date;
   if (category !== undefined) update.category = category;
@@ -49,6 +53,8 @@ router.put("/:id", async (req, res) => {
   if (note !== undefined) update.note = note;
   if (person !== undefined) update.person = person;
   if (isRecurring !== undefined) update.isRecurring = isRecurring;
+  if (foreignCurrency !== undefined) update.foreignCurrency = foreignCurrency;
+  if (foreignAmount !== undefined) update.foreignAmount = foreignAmount;
   const expense = await Expense.findOneAndUpdate(
     { _id: req.params.id, householdId: req.householdId },
     update,

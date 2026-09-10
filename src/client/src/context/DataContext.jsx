@@ -13,6 +13,7 @@ export function DataProvider({ children }) {
   const [balances, setBalances] = useState([]);
   const [settings, setSettings] = useState({
     currency: "$",
+    baseCurrencyCode: "USD",
     myLabel: "Sripradha",
     spouseLabel: "Sudheendra",
     budgets: {},
@@ -42,6 +43,7 @@ export function DataProvider({ children }) {
       setBalances(balancesData);
       setSettings({
         currency: settingsData.currency,
+        baseCurrencyCode: settingsData.baseCurrencyCode || "USD",
         myLabel: settingsData.myLabel,
         spouseLabel: settingsData.spouseLabel,
         budgets: settingsData.budgets || {},
@@ -114,6 +116,7 @@ export function DataProvider({ children }) {
     const updated = await api.updateSettings({ ...settings, ...partial });
     setSettings({
       currency: updated.currency,
+      baseCurrencyCode: updated.baseCurrencyCode || "USD",
       myLabel: updated.myLabel,
       spouseLabel: updated.spouseLabel,
       budgets: updated.budgets || {},

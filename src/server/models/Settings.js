@@ -8,6 +8,9 @@ const settingsSchema = new mongoose.Schema({
     unique: true,
   },
   currency: { type: String, default: "$" },
+  // 3-letter code (e.g. "USD") the household's `amount` fields are always
+  // stored in — needed to convert a foreign-currency entry into that amount.
+  baseCurrencyCode: { type: String, default: "USD" },
   myLabel: { type: String, default: "Sripradha" },
   spouseLabel: { type: String, default: "Sudheendra" },
   budgets: { type: Map, of: Number, default: {} },

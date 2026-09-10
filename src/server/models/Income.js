@@ -6,6 +6,8 @@ const incomeSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   person: { type: String, enum: ["mine", "spouse"], required: true },
   note: { type: String, default: "" },
+  foreignCurrency: { type: String, default: null },
+  foreignAmount: { type: Number, default: null },
 });
 
 export default mongoose.model("Income", incomeSchema);

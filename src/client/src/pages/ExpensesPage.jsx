@@ -6,6 +6,7 @@ import { monthKey, toInputDate, fromInputDate } from "../lib/month.js";
 import { findDuplicateGroups, expenseSignature } from "../lib/duplicates.js";
 import { getMissingRecurringForMonth } from "../lib/recurring.js";
 import { useUndoDelete } from "../hooks/useUndoDelete.js";
+import { fetchExchangeRate, CURRENCIES } from "../lib/currency.js";
 import Card from "../components/Card.jsx";
 import CategoryBadge from "../components/CategoryBadge.jsx";
 import ImportExpenses from "../components/ImportExpenses.jsx";
@@ -48,6 +49,9 @@ export default function ExpensesPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [addingRecurring, setAddingRecurring] = useState(false);
+  const [foreignCurrency, setForeignCurrency] = useState(false);
+  const [foreignCode, setForeignCode] = useState("INR");
+  const [currencyError, setCurrencyError] = useState(null);
 
   const monthExpenses = useMemo(
     () => expenses.filter((e) => monthKey(new Date(e.date)) === key),
@@ -171,16 +175,31 @@ export default function ExpensesPage() {
     e.preventDefault();
     if (!form.amount || !form.category) return;
     setSubmitting(true);
+    setCurrencyError(null);
     try {
+      const foreignAmount = parseFloat(form.amount);
+      let baseAmount = foreignAmount;
+      let payloadForeignCurrency;
+      let payloadForeignAmount;
+      if (foreignCurrency && foreignCode !== settings.baseCurrencyCode) {
+        const rate = await fetchExchangeRate(foreignCode, settings.baseCurrencyCode);
+        baseAmount = foreignAmount * rate;
+        payloadForeignCurrency = foreignCode;
+        payloadForeignAmount = foreignAmount;
+      }
       await addExpense({
         date: fromInputDate(form.date),
         category: form.category,
-        amount: parseFloat(form.amount),
+        amount: baseAmount,
         note: form.note,
         person: form.person,
         isRecurring: form.isRecurring,
+        foreignCurrency: payloadForeignCurrency,
+        foreignAmount: payloadForeignAmount,
       });
       setForm((f) => ({ ...f, amount: "", note: "", isRecurring: false }));
+    } catch (err) {
+      setCurrencyError(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -313,6 +332,30 @@ export default function ExpensesPage() {
             />
             <Repeat size={12} /> Repeats every month (same amount, same day) — I'll prompt you to add it in future months
           </label>
+          <div className="col-span-full flex items-center gap-2 flex-wrap">
+            <label className="flex items-center gap-1.5 text-xs text-ink/60">
+              <input
+                type="checkbox"
+                checked={foreignCurrency}
+                onChange={(e) => setForeignCurrency(e.target.checked)}
+              />
+              Paid in a different currency
+            </label>
+            {foreignCurrency && (
+              <select
+                value={foreignCode}
+                onChange={(e) => setForeignCode(e.target.value)}
+                className="rounded border border-mist px-2 py-1 text-xs"
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+          {currencyError && <p className="col-span-full text-xs text-red-400">{currencyError}</p>}
         </form>
       </Card>
 
@@ -521,6 +564,12 @@ function ExpenseRow({ expense: e, category, settings, showDate, onEdit, onDelete
             </>
           )}
           {e.person === "spouse" ? settings.spouseLabel : settings.myLabel}
+          {e.foreignCurrency && (
+            <>
+              {" · "}
+              {e.foreignAmount} {e.foreignCurrency}
+            </>
+          )}
         </p>
       </div>
       <div className="flex items-center gap-2 shrink-0">

@@ -9,8 +9,16 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const { date, amount, person, note } = req.body;
-  const income = await Income.create({ date, amount, person, note, householdId: req.householdId });
+  const { date, amount, person, note, foreignCurrency, foreignAmount } = req.body;
+  const income = await Income.create({
+    date,
+    amount,
+    person,
+    note,
+    foreignCurrency,
+    foreignAmount,
+    householdId: req.householdId,
+  });
   res.status(201).json(income);
 });
 
