@@ -16,7 +16,7 @@ export default function Header() {
   const fmt = (n) => `${settings.currency}${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 
   return (
-    <header className="sticky top-0 z-20 bg-gradient-to-r from-plum to-coral text-cream shadow-soft">
+    <header className="sticky top-0 z-20 bg-plum text-cream shadow-soft border-b-2 border-coral/70">
       <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2">
           <Wallet size={26} className="shrink-0" />
@@ -35,8 +35,13 @@ export default function Header() {
 function Stat({ label, value, className = "" }) {
   return (
     <div className="flex flex-col items-end">
-      <span className="text-cream/70 text-[11px] uppercase tracking-wide">{label}</span>
-      <span className={`font-display font-bold ${className}`}>{value}</span>
+      <span className="text-cream/60 text-[11px] uppercase tracking-wide">{label}</span>
+      <span
+        key={value}
+        className={`font-display font-bold animate-page-in ${className}`}
+      >
+        {value}
+      </span>
     </div>
   );
 }

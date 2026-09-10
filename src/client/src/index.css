@@ -18,3 +18,88 @@ h1, h2, h3, h4 {
   background: #c9cce0;
   border-radius: 8px;
 }
+
+/* Give every button a consistent, tactile feel without having to touch each
+   component: a quick press-down on click, smooth transitions on hover/focus. */
+button:not(:disabled) {
+  transition: transform 120ms ease, box-shadow 150ms ease, background-color 150ms ease,
+    border-color 150ms ease, opacity 150ms ease, color 150ms ease;
+}
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+a,
+select,
+input[type="checkbox"] {
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease,
+    opacity 150ms ease;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-modal-in {
+  animation: modal-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.animate-backdrop-in {
+  animation: backdrop-in 150ms ease-out;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-page-in {
+  animation: page-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Scroll-shadow hint for horizontally-scrollable tables: fades in a shadow on
+   whichever edge still has more content, purely from scroll position (no JS). */
+.scroll-fade-x {
+  background: linear-gradient(to right, white 30%, rgba(255, 255, 255, 0)),
+    linear-gradient(to right, rgba(255, 255, 255, 0), white 70%) 100% 0,
+    linear-gradient(to right, rgba(28, 27, 41, 0.12), rgba(28, 27, 41, 0)),
+    linear-gradient(to left, rgba(28, 27, 41, 0.12), rgba(28, 27, 41, 0)) 100% 0;
+  background-repeat: no-repeat;
+  background-color: white;
+  background-size: 24px 100%, 24px 100%, 10px 100%, 10px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:not(:disabled),
+  a,
+  select,
+  input[type="checkbox"],
+  .animate-modal-in,
+  .animate-backdrop-in,
+  .animate-page-in {
+    animation: none !important;
+    transition: none !important;
+  }
+  button:not(:disabled):active {
+    transform: none;
+  }
+}

@@ -26,13 +26,13 @@ function AppShell() {
         {loading ? (
           <p className="text-center text-ink/50 py-10">Loading your finances…</p>
         ) : (
-          <>
+          <div key={tab} className="animate-page-in">
             {tab === "overview" && <OverviewPage />}
             {tab === "expenses" && <ExpensesPage />}
             {tab === "income" && <IncomePage />}
             {tab === "budgets" && <BudgetsPage />}
             {tab === "settings" && <SettingsPage />}
-          </>
+          </div>
         )}
       </main>
     </div>

@@ -26,3 +26,12 @@ export function toInputDate(date) {
     d.getDate()
   ).padStart(2, "0")}`;
 }
+
+// Parse a "YYYY-MM-DD" <input type="date"> value into a local-midnight Date, matching
+// how the Excel importer builds dates. Sending the raw string instead would let the
+// server's `new Date("YYYY-MM-DD")` cast interpret it as UTC midnight — a different
+// instant that redisplays as the previous day in any timezone behind UTC.
+export function fromInputDate(dateString) {
+  const [y, m, d] = dateString.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}

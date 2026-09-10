@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { api } from "../lib/api.js";
 import { mergeCategories } from "../lib/categories.js";
+import { oneTimeBudgetKey } from "../lib/budgets.js";
 
 const DataContext = createContext(null);
 
@@ -11,8 +12,9 @@ export function DataProvider({ children }) {
   const [settings, setSettings] = useState({
     currency: "$",
     myLabel: "Sripradha",
-    spouseLabel: "Laksh",
+    spouseLabel: "Sudheendra",
     budgets: {},
+    oneTimeBudgets: {},
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,6 +36,7 @@ export function DataProvider({ children }) {
         myLabel: settingsData.myLabel,
         spouseLabel: settingsData.spouseLabel,
         budgets: settingsData.budgets || {},
+        oneTimeBudgets: settingsData.oneTimeBudgets || {},
       });
       setError(null);
     } catch (err) {
@@ -57,6 +60,13 @@ export function DataProvider({ children }) {
   const bulkAddExpenses = useCallback(async (rows) => {
     const created = await api.bulkCreateExpenses(rows);
     setExpenses((prev) => [...created, ...prev]);
+    return created;
+  }, []);
+
+  const updateExpense = useCallback(async (id, data) => {
+    const updated = await api.updateExpense(id, data);
+    setExpenses((prev) => prev.map((e) => (e._id === id ? updated : e)));
+    return updated;
   }, []);
 
   const removeExpense = useCallback(async (id) => {
@@ -67,6 +77,11 @@ export function DataProvider({ children }) {
   const addIncome = useCallback(async (data) => {
     const created = await api.createIncome(data);
     setIncome((prev) => [created, ...prev]);
+  }, []);
+
+  const bulkAddIncome = useCallback(async (rows) => {
+    const created = await api.bulkCreateIncome(rows);
+    setIncome((prev) => [...created, ...prev]);
   }, []);
 
   const removeIncome = useCallback(async (id) => {
@@ -91,13 +106,27 @@ export function DataProvider({ children }) {
       myLabel: updated.myLabel,
       spouseLabel: updated.spouseLabel,
       budgets: updated.budgets || {},
+      oneTimeBudgets: updated.oneTimeBudgets || {},
     });
   }, [settings]);
 
-  const setBudget = useCallback(async (categoryId, amount) => {
-    const nextBudgets = { ...settings.budgets, [categoryId]: amount };
-    await updateSettings({ budgets: nextBudgets });
-  }, [settings.budgets, updateSettings]);
+  // Pass a monthKey to set a one-off budget for just that month instead of the
+  // recurring monthly amount.
+  const setBudget = useCallback(
+    async (categoryId, amount, monthKey = null) => {
+      if (monthKey) {
+        const nextOneTime = {
+          ...settings.oneTimeBudgets,
+          [oneTimeBudgetKey(monthKey, categoryId)]: amount,
+        };
+        await updateSettings({ oneTimeBudgets: nextOneTime });
+      } else {
+        const nextBudgets = { ...settings.budgets, [categoryId]: amount };
+        await updateSettings({ budgets: nextBudgets });
+      }
+    },
+    [settings.budgets, settings.oneTimeBudgets, updateSettings]
+  );
 
   const resetAll = useCallback(async () => {
     await api.resetAll();
@@ -114,8 +143,10 @@ export function DataProvider({ children }) {
     error,
     addExpense,
     bulkAddExpenses,
+    updateExpense,
     removeExpense,
     addIncome,
+    bulkAddIncome,
     removeIncome,
     addCategory,
     removeCategory,

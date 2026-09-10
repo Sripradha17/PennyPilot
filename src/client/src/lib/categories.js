@@ -48,12 +48,56 @@ export function mergeCategories(customCategories) {
   return [...DEFAULT_CATEGORIES, ...custom];
 }
 
-export function findCategoryByName(allCategories, name) {
+function stem(word) {
+  if (word.endsWith("ies")) return word.slice(0, -3) + "y";
+  if (word.endsWith("s") && !word.endsWith("ss")) return word.slice(0, -1);
+  return word;
+}
+
+function normalizeForMatch(s) {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+const FILLER_WORDS = new Set(["in", "us", "the", "a", "an", "of", "and", "for", "on", "at"]);
+
+// Matches plurals/case/punctuation variants of the SAME name (e.g. "Gifts" -> "Gift",
+// "Eating out" -> "Eating Out"), but deliberately stays strict about compound names that
+// merely contain a category word — "India Investment" should stay distinct from "Investment",
+// and "India travel provision" should never silently land in the generic "Provision" bucket.
+// A wrong merge here isn't just a mis-tagged row, it corrupts a shared budget or hides real
+// spending inside an unrelated category, so ambiguous names always fall through to "+ New
+// category" in the import review screen instead of guessing.
+export function findCategoryByNameExact(allCategories, name) {
   if (!name) return null;
   const normalized = name.trim().toLowerCase();
-  return (
+
+  const exact =
     allCategories.find((c) => c.label.toLowerCase() === normalized) ||
-    allCategories.find((c) => c.id.toLowerCase() === normalized) ||
-    null
+    allCategories.find((c) => c.id.toLowerCase() === normalized);
+  if (exact) return exact;
+
+  const inputStems = new Set(
+    normalizeForMatch(name)
+      .split(" ")
+      .filter((w) => w && !FILLER_WORDS.has(w))
+      .map(stem)
+  );
+  if (inputStems.size === 0) return null;
+
+  return (
+    allCategories.find((c) => {
+      const labelStems = new Set(
+        normalizeForMatch(c.label)
+          .split(" ")
+          .filter(Boolean)
+          .map(stem)
+      );
+      if (labelStems.size !== inputStems.size) return false;
+      for (const w of labelStems) if (!inputStems.has(w)) return false;
+      return true;
+    }) || null
   );
 }

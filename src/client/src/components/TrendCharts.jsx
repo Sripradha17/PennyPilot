@@ -39,7 +39,7 @@ export function IncomeExpenseTrendChart({ data, currency }) {
     <Card>
       <h3 className="font-bold mb-3">Income vs. expenses (last {data.length} months)</h3>
       <ResponsiveContainer width="100%" height={240}>
-        <AreaChart data={data} margin={{ left: -10, right: 10 }}>
+        <AreaChart data={data} margin={{ left: 0, right: 10 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#eef0f6" />
           <XAxis dataKey="label" tick={{ fontSize: 12 }} />
           <YAxis tick={{ fontSize: 12 }} width={50} />

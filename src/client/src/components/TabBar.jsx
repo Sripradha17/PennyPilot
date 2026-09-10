@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { LayoutDashboard, Receipt, Wallet, Target, Settings as SettingsIcon } from "lucide-react";
 
 const TABS = [
@@ -9,9 +10,28 @@ const TABS = [
 ];
 
 export default function TabBar({ active, onChange }) {
+  const scrollRef = useRef(null);
+  const [canScrollMore, setCanScrollMore] = useState(false);
+
+  function updateFade() {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollMore(el.scrollWidth - el.scrollLeft - el.clientWidth > 4);
+  }
+
+  useEffect(() => {
+    updateFade();
+    window.addEventListener("resize", updateFade);
+    return () => window.removeEventListener("resize", updateFade);
+  }, []);
+
   return (
     <nav className="sticky top-[64px] sm:top-[60px] z-10 bg-cream border-b border-mist shadow-sm">
-      <div className="max-w-5xl mx-auto flex overflow-x-auto">
+      <div
+        ref={scrollRef}
+        onScroll={updateFade}
+        className="max-w-5xl mx-auto flex overflow-x-auto"
+      >
         {TABS.map(({ id, label, icon: Icon }) => {
           const isActive = active === id;
           return (
@@ -30,6 +50,9 @@ export default function TabBar({ active, onChange }) {
           );
         })}
       </div>
+      {canScrollMore && (
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-cream to-transparent" />
+      )}
     </nav>
   );
 }

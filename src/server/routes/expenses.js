@@ -9,8 +9,8 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const { date, category, amount, note } = req.body;
-  const expense = await Expense.create({ date, category, amount, note });
+  const { date, category, amount, note, person } = req.body;
+  const expense = await Expense.create({ date, category, amount, note, person });
   res.status(201).json(expense);
 });
 
@@ -19,14 +19,28 @@ router.post("/bulk", async (req, res) => {
   if (!Array.isArray(rows) || rows.length === 0) {
     return res.status(400).json({ error: "rows must be a non-empty array" });
   }
-  const docs = rows.map(({ date, category, amount, note }) => ({
+  const docs = rows.map(({ date, category, amount, note, person }) => ({
     date,
     category,
     amount,
     note,
+    person,
   }));
   const created = await Expense.insertMany(docs);
   res.status(201).json(created);
+});
+
+router.put("/:id", async (req, res) => {
+  const { date, category, amount, note, person } = req.body;
+  const update = {};
+  if (date !== undefined) update.date = date;
+  if (category !== undefined) update.category = category;
+  if (amount !== undefined) update.amount = amount;
+  if (note !== undefined) update.note = note;
+  if (person !== undefined) update.person = person;
+  const expense = await Expense.findByIdAndUpdate(req.params.id, update, { new: true });
+  if (!expense) return res.status(404).json({ error: "Expense not found" });
+  res.json(expense);
 });
 
 router.delete("/:id", async (req, res) => {

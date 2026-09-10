@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { getEffectiveBudget } from "./budgets.js";
 
 export function exportMonthToExcel({ monthDate, monthKeyStr, categories, settings, monthExpenses, monthIncome }) {
   const spentByCategory = {};
@@ -7,7 +8,7 @@ export function exportMonthToExcel({ monthDate, monthKeyStr, categories, setting
   });
 
   const budgetRows = categories.map((c) => {
-    const budgeted = settings.budgets[c.id] || 0;
+    const budgeted = getEffectiveBudget(settings, c.id, monthKeyStr);
     const spent = spentByCategory[c.id] || 0;
     const remaining = budgeted - spent;
     const pctUsed = budgeted > 0 ? Math.round((spent / budgeted) * 100) : 0;

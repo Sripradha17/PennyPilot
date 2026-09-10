@@ -1,13 +1,17 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Trash2, Plus } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
-import { monthKey, toInputDate } from "../lib/month.js";
+import { monthKey, toInputDate, fromInputDate } from "../lib/month.js";
 import Card from "../components/Card.jsx";
+import Pagination from "../components/Pagination.jsx";
+
+const PAGE_SIZE = 25;
 
 export default function IncomePage() {
   const { income, settings, addIncome, removeIncome } = useData();
   const { key } = useMonth();
+  const [page, setPage] = useState(1);
 
   const [form, setForm] = useState({
     date: toInputDate(new Date()),
@@ -25,6 +29,12 @@ export default function IncomePage() {
     [income, key]
   );
 
+  useEffect(() => {
+    setPage(1);
+  }, [key]);
+
+  const pageIncome = monthIncome.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   const totals = useMemo(() => {
     const mine = monthIncome.filter((i) => i.person === "mine").reduce((s, i) => s + i.amount, 0);
     const spouse = monthIncome.filter((i) => i.person === "spouse").reduce((s, i) => s + i.amount, 0);
@@ -37,7 +47,7 @@ export default function IncomePage() {
     setSubmitting(true);
     try {
       await addIncome({
-        date: form.date,
+        date: fromInputDate(form.date),
         amount: parseFloat(form.amount),
         person: form.person,
         note: form.note,
@@ -118,8 +128,11 @@ export default function IncomePage() {
           <p className="text-ink/50 text-sm py-6 text-center">No income logged yet.</p>
         ) : (
           <ul className="divide-y divide-mist">
-            {monthIncome.map((i) => (
-              <li key={i._id} className="flex items-center justify-between py-2.5 gap-3">
+            {pageIncome.map((i) => (
+              <li
+                key={i._id}
+                className="flex items-center justify-between py-2.5 gap-3 px-2 -mx-2 rounded-lg hover:bg-mist/50 transition-colors duration-150"
+              >
                 <div className="min-w-0">
                   <p className="text-sm font-medium">
                     {i.person === "mine" ? settings.myLabel : settings.spouseLabel}
@@ -146,6 +159,7 @@ export default function IncomePage() {
             ))}
           </ul>
         )}
+        <Pagination page={page} pageSize={PAGE_SIZE} total={monthIncome.length} onPageChange={setPage} />
       </Card>
     </div>
   );
