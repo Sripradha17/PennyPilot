@@ -1,7 +1,7 @@
 {
   "name": "pennypilot",
   "version": "1.0.0",
-  "description": "PennyPilot - household finance tracker",
+  "description": "Budget Raccoon - household finance tracker",
   "private": true,
   "type": "module",
   "scripts": {

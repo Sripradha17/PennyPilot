@@ -27,7 +27,7 @@ app.use("/api/reset", requireAuth, resetRouter);
 
 connectDB()
   .then(() => {
-    app.listen(PORT, () => console.log(`PennyPilot API listening on port ${PORT}`));
+    app.listen(PORT, () => console.log(`Budget Raccoon API listening on port ${PORT}`));
   })
   .catch((err) => {
     console.error("Failed to connect to MongoDB:", err.message);

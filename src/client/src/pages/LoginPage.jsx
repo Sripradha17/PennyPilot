@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Wallet, Mail, Lock } from "lucide-react";
+import { Mail, Lock } from "lucide-react";
 import { api } from "../lib/api.js";
+import RaccoonMascot from "../components/RaccoonMascot.jsx";
 
 export default function LoginPage({ onLoggedIn }) {
   const [mode, setMode] = useState("login"); // "login" | "signup"
@@ -30,9 +31,9 @@ export default function LoginPage({ onLoggedIn }) {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <Wallet size={28} className="text-ink" />
-          <span className="font-display font-extrabold text-2xl tracking-tight">PennyPilot</span>
+        <div className="flex flex-col items-center justify-center gap-1 mb-6">
+          <RaccoonMascot size={104} />
+          <span className="font-display font-extrabold text-2xl tracking-tight">Budget Raccoon</span>
         </div>
         <form
           onSubmit={handleSubmit}

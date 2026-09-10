@@ -1,4 +1,4 @@
-# PennyPilot
+# Budget Raccoon
 
 A household finance tracker — log expenses and income, set monthly category budgets, import
 past expenses from Excel/CSV, and export a monthly budget report. Data lives in MongoDB Atlas

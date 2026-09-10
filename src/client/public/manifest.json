@@ -1,6 +1,6 @@
 {
-  "name": "PennyPilot",
-  "short_name": "PennyPilot",
+  "name": "Budget Raccoon",
+  "short_name": "Budget Raccoon",
   "description": "Household finance tracker",
   "start_url": "/PennyPilot/",
   "scope": "/PennyPilot/",
