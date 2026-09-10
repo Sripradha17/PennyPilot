@@ -17,7 +17,7 @@ function AppShell({ onLogout }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header onLogout={onLogout} />
       <TabBar active={tab} onChange={setTab} />
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-5">
         {error && (

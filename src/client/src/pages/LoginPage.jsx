@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import { api } from "../lib/api.js";
 import RaccoonMascot from "../components/RaccoonMascot.jsx";
+import AboutCarousel from "../components/AboutCarousel.jsx";
 
 export default function LoginPage({ onLoggedIn }) {
   const [mode, setMode] = useState("login"); // "login" | "signup"
@@ -29,15 +30,21 @@ export default function LoginPage({ onLoggedIn }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col items-center justify-center gap-1 mb-6">
-          <RaccoonMascot size={104} />
-          <span className="font-display font-extrabold text-2xl tracking-tight">Budget Raccoon</span>
+    <div className="min-h-screen flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-4xl flex flex-col sm:flex-row items-center gap-10 sm:gap-14">
+        <div className="flex flex-col items-center sm:items-start gap-4 sm:flex-1">
+          <div className="flex flex-col items-center sm:items-start gap-1">
+            <RaccoonMascot size={128} />
+            <span className="font-display font-extrabold text-2xl tracking-tight mt-1">
+              Budget Raccoon
+            </span>
+          </div>
+          <AboutCarousel />
         </div>
+
         <form
           onSubmit={handleSubmit}
-          className="bg-surface border border-mist rounded-2xl shadow-soft p-6 space-y-4"
+          className="w-full max-w-sm sm:flex-1 bg-surface border border-mist rounded-2xl shadow-soft p-6 space-y-4"
         >
           <div className="flex rounded-lg border border-mist p-1 text-sm">
             <button

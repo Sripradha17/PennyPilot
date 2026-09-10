@@ -1,10 +1,12 @@
+import { LogOut } from "lucide-react";
 import MonthNavigator from "./MonthNavigator.jsx";
 import RaccoonMascot from "./RaccoonMascot.jsx";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey } from "../lib/month.js";
+import { clearToken } from "../lib/api.js";
 
-export default function Header() {
+export default function Header({ onLogout }) {
   const { expenses, income, settings } = useData();
   const { key } = useMonth();
 
@@ -23,9 +25,20 @@ export default function Header() {
           <span className="font-display font-extrabold text-xl tracking-tight">Budget Raccoon</span>
         </div>
         <MonthNavigator />
-        <div className="flex gap-4 text-sm">
+        <div className="flex items-center gap-4 text-sm">
           <Stat label="Income" value={fmt(totalIncome)} />
           <Stat label="Expenses" value={fmt(totalExpenses)} />
+          <button
+            onClick={() => {
+              clearToken();
+              onLogout();
+            }}
+            className="text-ink/40 hover:text-ink transition"
+            aria-label="Log out"
+            title="Log out"
+          >
+            <LogOut size={18} />
+          </button>
         </div>
       </div>
     </header>

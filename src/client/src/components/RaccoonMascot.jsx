@@ -1,29 +1,34 @@
-// A hand-drawn (not emoji) raccoon mascot, built from plain SVG shapes so it
-// stays crisp at any size and can be animated with CSS alone — no image
-// assets, no animation library.
+// A hand-drawn (not emoji) full-body raccoon mascot, built from plain SVG
+// shapes so it stays crisp at any size and can be animated with CSS alone —
+// no image assets, no animation library.
 export default function RaccoonMascot({ size = 96, className = "" }) {
   return (
     <svg
       width={size}
-      height={size}
-      viewBox="0 0 200 200"
+      height={size * 1.3}
+      viewBox="0 0 200 260"
       className={`raccoon-mascot ${className}`}
       role="img"
       aria-label="Budget Raccoon mascot"
     >
       <style>{`
         .raccoon-mascot { overflow: visible; }
-        .raccoon-mascot .rc-body { animation: rc-bob 3.2s ease-in-out infinite; transform-origin: 100px 180px; }
-        .raccoon-mascot .rc-tail { animation: rc-tail 2.6s ease-in-out infinite; transform-origin: 165px 150px; }
+        .raccoon-mascot .rc-figure { animation: rc-hop 2.8s ease-in-out infinite; transform-origin: 100px 250px; }
+        .raccoon-mascot .rc-tail { animation: rc-tail 2.4s ease-in-out infinite; transform-origin: 148px 175px; }
+        .raccoon-mascot .rc-arm-wave { animation: rc-wave 1.4s ease-in-out infinite; transform-origin: 148px 158px; }
         .raccoon-mascot .rc-eye { animation: rc-blink 4.5s ease-in-out infinite; transform-origin: center; }
         .raccoon-mascot .rc-eye-right { animation-delay: 0.05s; }
-        @keyframes rc-bob {
+        @keyframes rc-hop {
           0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-4px) rotate(-1.5deg); }
+          50% { transform: translateY(-10px) rotate(-2deg); }
         }
         @keyframes rc-tail {
-          0%, 100% { transform: rotate(0deg); }
-          50% { transform: rotate(8deg); }
+          0%, 100% { transform: rotate(-6deg); }
+          50% { transform: rotate(14deg); }
+        }
+        @keyframes rc-wave {
+          0%, 100% { transform: rotate(-10deg); }
+          50% { transform: rotate(-55deg); }
         }
         @keyframes rc-blink {
           0%, 92%, 100% { transform: scaleY(1); }
@@ -31,15 +36,31 @@ export default function RaccoonMascot({ size = 96, className = "" }) {
         }
       `}</style>
 
-      <g className="rc-body">
-        {/* Striped tail, peeking out behind */}
+      <g className="rc-figure">
+        {/* Tail, behind the body */}
         <g className="rc-tail">
-          <path
-            d="M150 165 C185 160 195 120 165 95 C185 110 180 150 150 165 Z"
-            fill="#8a8a96"
-          />
-          <path d="M158 152 C172 145 178 128 168 112" stroke="#3a3a44" strokeWidth="9" strokeLinecap="round" fill="none" />
-          <path d="M163 130 C173 122 176 110 170 100" stroke="#3a3a44" strokeWidth="8" strokeLinecap="round" fill="none" />
+          <path d="M140 190 C185 185 200 130 165 100 C190 125 185 175 140 190 Z" fill="#8a8a96" />
+          <path d="M150 175 C170 165 178 140 165 118" stroke="#3a3a44" strokeWidth="10" strokeLinecap="round" fill="none" />
+          <path d="M156 148 C168 138 172 122 163 108" stroke="#3a3a44" strokeWidth="9" strokeLinecap="round" fill="none" />
+        </g>
+
+        {/* Legs / feet */}
+        <ellipse cx="78" cy="242" rx="20" ry="13" fill="#3a3a44" />
+        <ellipse cx="124" cy="242" rx="20" ry="13" fill="#3a3a44" />
+
+        {/* Body */}
+        <ellipse cx="100" cy="195" rx="50" ry="46" fill="#9b9ba6" />
+        {/* Belly / vest */}
+        <ellipse cx="100" cy="202" rx="29" ry="32" fill="#4a9186" />
+
+        {/* Resting left arm */}
+        <path d="M56 172 C40 182 34 205 44 222" stroke="#9b9ba6" strokeWidth="22" strokeLinecap="round" fill="none" />
+        <circle cx="45" cy="224" r="12" fill="#9b9ba6" />
+
+        {/* Waving right arm */}
+        <g className="rc-arm-wave">
+          <path d="M148 158 C170 150 182 130 178 110" stroke="#9b9ba6" strokeWidth="22" strokeLinecap="round" fill="none" />
+          <circle cx="178" cy="108" r="13" fill="#9b9ba6" />
         </g>
 
         {/* Ears */}
@@ -73,8 +94,8 @@ export default function RaccoonMascot({ size = 96, className = "" }) {
         {/* Nose */}
         <ellipse cx="100" cy="118" rx="7" ry="5" fill="#c9776b" />
 
-        {/* Neckerchief — a small nod to the brand color */}
-        <path d="M68 150 C85 165 115 165 132 150 L124 172 C110 180 90 180 76 172 Z" fill="#4a9186" />
+        {/* Neckerchief */}
+        <path d="M68 150 C85 165 115 165 132 150 L124 172 C110 180 90 180 76 172 Z" fill="#c9776b" />
       </g>
     </svg>
   );
