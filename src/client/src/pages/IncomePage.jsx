@@ -3,8 +3,10 @@ import { Trash2, Plus } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey, toInputDate, fromInputDate } from "../lib/month.js";
+import { useUndoDelete } from "../hooks/useUndoDelete.js";
 import Card from "../components/Card.jsx";
 import Pagination from "../components/Pagination.jsx";
+import UndoToast from "../components/UndoToast.jsx";
 
 const PAGE_SIZE = 25;
 
@@ -12,6 +14,27 @@ export default function IncomePage() {
   const { income, settings, addIncome, removeIncome } = useData();
   const { key } = useMonth();
   const [page, setPage] = useState(1);
+
+  const {
+    pending: pendingDelete,
+    deleteWithUndo,
+    undo: undoDelete,
+    dismiss: dismissUndo,
+  } = useUndoDelete({
+    onDelete: (item) => removeIncome(item._id),
+    onRestore: (item) =>
+      addIncome({
+        date: item.date,
+        amount: item.amount,
+        person: item.person,
+        note: item.note,
+      }),
+  });
+
+  function handleDeleteIncome(item) {
+    const label = item.note || (item.person === "mine" ? settings.myLabel : settings.spouseLabel);
+    deleteWithUndo(item, `"${label}" income deleted`);
+  }
 
   const [form, setForm] = useState({
     date: toInputDate(new Date()),
@@ -148,7 +171,7 @@ export default function IncomePage() {
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="font-semibold">{fmt(i.amount)}</span>
                   <button
-                    onClick={() => removeIncome(i._id)}
+                    onClick={() => handleDeleteIncome(i)}
                     className="text-ink/30 hover:text-red-500 transition"
                     aria-label="Delete income"
                   >
@@ -161,6 +184,9 @@ export default function IncomePage() {
         )}
         <Pagination page={page} pageSize={PAGE_SIZE} total={monthIncome.length} onPageChange={setPage} />
       </Card>
+      {pendingDelete && (
+        <UndoToast message={pendingDelete.label} onUndo={undoDelete} onDismiss={dismissUndo} />
+      )}
     </div>
   );
 }

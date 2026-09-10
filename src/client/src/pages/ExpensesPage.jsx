@@ -5,11 +5,13 @@ import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey, toInputDate, fromInputDate } from "../lib/month.js";
 import { findDuplicateGroups, expenseSignature } from "../lib/duplicates.js";
 import { getMissingRecurringForMonth } from "../lib/recurring.js";
+import { useUndoDelete } from "../hooks/useUndoDelete.js";
 import Card from "../components/Card.jsx";
 import CategoryBadge from "../components/CategoryBadge.jsx";
 import ImportExpenses from "../components/ImportExpenses.jsx";
 import DuplicateExpenses from "../components/DuplicateExpenses.jsx";
 import Pagination from "../components/Pagination.jsx";
+import UndoToast from "../components/UndoToast.jsx";
 
 export default function ExpensesPage() {
   const {
@@ -122,6 +124,29 @@ export default function ExpensesPage() {
     () => (dismissedRecurringMonths.includes(key) ? [] : getMissingRecurringForMonth(expenses, key)),
     [expenses, key, dismissedRecurringMonths]
   );
+
+  const {
+    pending: pendingDelete,
+    deleteWithUndo,
+    undo: undoDelete,
+    dismiss: dismissUndo,
+  } = useUndoDelete({
+    onDelete: (expense) => removeExpense(expense._id),
+    onRestore: (expense) =>
+      addExpense({
+        date: expense.date,
+        category: expense.category,
+        amount: expense.amount,
+        note: expense.note,
+        person: expense.person,
+        isRecurring: expense.isRecurring,
+      }),
+  });
+
+  function handleDeleteExpense(expense) {
+    const label = expense.note || categoryById[expense.category]?.label || "Expense";
+    deleteWithUndo(expense, `"${label}" deleted`);
+  }
 
   async function handleAddAllRecurring() {
     setAddingRecurring(true);
@@ -417,7 +442,7 @@ export default function ExpensesPage() {
                         category={categoryById[e.category]}
                         settings={settings}
                         onEdit={() => startEdit(e)}
-                        onDelete={() => removeExpense(e._id)}
+                        onDelete={() => handleDeleteExpense(e)}
                       />
                     )
                   )}
@@ -449,7 +474,7 @@ export default function ExpensesPage() {
                   settings={settings}
                   showDate
                   onEdit={() => startEdit(e)}
-                  onDelete={() => removeExpense(e._id)}
+                  onDelete={() => handleDeleteExpense(e)}
                 />
               )
             )}
@@ -469,6 +494,9 @@ export default function ExpensesPage() {
           onKeepGroup={handleKeepDuplicateGroup}
           onClose={() => setShowDuplicates(false)}
         />
+      )}
+      {pendingDelete && (
+        <UndoToast message={pendingDelete.label} onUndo={undoDelete} onDismiss={dismissUndo} />
       )}
     </div>
   );
