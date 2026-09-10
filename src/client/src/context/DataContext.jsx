@@ -9,6 +9,7 @@ export function DataProvider({ children }) {
   const [expenses, setExpenses] = useState([]);
   const [income, setIncome] = useState([]);
   const [customCategories, setCustomCategories] = useState([]);
+  const [goals, setGoals] = useState([]);
   const [settings, setSettings] = useState({
     currency: "$",
     myLabel: "Sripradha",
@@ -24,15 +25,17 @@ export function DataProvider({ children }) {
   const refreshAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [expensesData, incomeData, categoriesData, settingsData] = await Promise.all([
+      const [expensesData, incomeData, categoriesData, settingsData, goalsData] = await Promise.all([
         api.getExpenses(),
         api.getIncome(),
         api.getCategories(),
         api.getSettings(),
+        api.getGoals(),
       ]);
       setExpenses(expensesData);
       setIncome(incomeData);
       setCustomCategories(categoriesData);
+      setGoals(goalsData);
       setSettings({
         currency: settingsData.currency,
         myLabel: settingsData.myLabel,
@@ -139,11 +142,28 @@ export function DataProvider({ children }) {
     await refreshAll();
   }, [refreshAll]);
 
+  const addGoal = useCallback(async (data) => {
+    const created = await api.createGoal(data);
+    setGoals((prev) => [created, ...prev]);
+  }, []);
+
+  const updateGoal = useCallback(async (id, data) => {
+    const updated = await api.updateGoal(id, data);
+    setGoals((prev) => prev.map((g) => (g._id === id ? updated : g)));
+    return updated;
+  }, []);
+
+  const removeGoal = useCallback(async (id) => {
+    await api.deleteGoal(id);
+    setGoals((prev) => prev.filter((g) => g._id !== id));
+  }, []);
+
   const value = {
     expenses,
     income,
     categories,
     customCategories,
+    goals,
     settings,
     loading,
     error,
@@ -160,6 +180,9 @@ export function DataProvider({ children }) {
     setBudget,
     resetAll,
     refreshAll,
+    addGoal,
+    updateGoal,
+    removeGoal,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

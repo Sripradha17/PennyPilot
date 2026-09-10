@@ -1,0 +1,192 @@
+import { useMemo, useState } from "react";
+import { Plus, Trash2, Target } from "lucide-react";
+import { useData } from "../context/DataContext.jsx";
+import { fromInputDate } from "../lib/month.js";
+import Card from "../components/Card.jsx";
+
+export default function GoalsPage() {
+  const { expenses, categories, goals, settings, addGoal, updateGoal, removeGoal } = useData();
+
+  const [form, setForm] = useState({
+    name: "",
+    targetAmount: "",
+    targetDate: "",
+    linkedCategoryId: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [progressEdits, setProgressEdits] = useState({});
+
+  const progressByGoal = useMemo(() => {
+    const map = {};
+    for (const g of goals) {
+      if (g.linkedCategoryId) {
+        const start = new Date(g.startDate).getTime();
+        map[g._id] = expenses
+          .filter((e) => e.category === g.linkedCategoryId && new Date(e.date).getTime() >= start)
+          .reduce((s, e) => s + e.amount, 0);
+      } else {
+        map[g._id] = g.manualProgress || 0;
+      }
+    }
+    return map;
+  }, [goals, expenses]);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!form.name || !form.targetAmount) return;
+    setSubmitting(true);
+    try {
+      await addGoal({
+        name: form.name,
+        targetAmount: parseFloat(form.targetAmount),
+        targetDate: form.targetDate ? fromInputDate(form.targetDate) : undefined,
+        linkedCategoryId: form.linkedCategoryId || null,
+      });
+      setForm({ name: "", targetAmount: "", targetDate: "", linkedCategoryId: "" });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function saveProgress(goalId) {
+    const raw = progressEdits[goalId];
+    const amount = parseFloat(raw);
+    await updateGoal(goalId, { manualProgress: Number.isNaN(amount) ? 0 : amount });
+    setProgressEdits((prev) => {
+      const next = { ...prev };
+      delete next[goalId];
+      return next;
+    });
+  }
+
+  const fmt = (n) => `${settings.currency}${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+
+  return (
+    <div className="space-y-5">
+      <Card>
+        <h2 className="font-bold text-lg mb-3">New savings goal</h2>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+          <input
+            type="text"
+            placeholder="Goal name"
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            className="sm:col-span-2 rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
+            required
+          />
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder={`Target (${settings.currency})`}
+            value={form.targetAmount}
+            onChange={(e) => setForm((f) => ({ ...f, targetAmount: e.target.value }))}
+            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
+            required
+          />
+          <input
+            type="date"
+            value={form.targetDate}
+            onChange={(e) => setForm((f) => ({ ...f, targetDate: e.target.value }))}
+            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
+          />
+          <select
+            value={form.linkedCategoryId}
+            onChange={(e) => setForm((f) => ({ ...f, linkedCategoryId: e.target.value }))}
+            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
+          >
+            <option value="">Track manually</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                Track via {c.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="sm:col-span-5 flex items-center justify-center gap-1.5 rounded-lg bg-coral text-white font-medium px-3 py-2 text-sm hover:bg-coral/90 disabled:opacity-50 sm:w-auto sm:justify-self-start sm:px-6"
+          >
+            <Plus size={16} /> Add goal
+          </button>
+        </form>
+      </Card>
+
+      {goals.length === 0 ? (
+        <Card>
+          <p className="text-ink/50 text-sm py-6 text-center">No savings goals yet — add one above.</p>
+        </Card>
+      ) : (
+        <div className="grid sm:grid-cols-2 gap-4">
+          {goals.map((g) => {
+            const progress = progressByGoal[g._id] || 0;
+            const pct = g.targetAmount > 0 ? Math.min(100, (progress / g.targetAmount) * 100) : 0;
+            const category = categories.find((c) => c.id === g.linkedCategoryId);
+            const isEditingProgress = progressEdits[g._id] !== undefined;
+
+            return (
+              <Card key={g._id}>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Target size={16} className="text-teal shrink-0" />
+                    <span className="font-semibold text-sm truncate">{g.name}</span>
+                  </div>
+                  <button
+                    onClick={() => removeGoal(g._id)}
+                    className="text-ink/30 hover:text-red-500 shrink-0"
+                    aria-label={`Delete ${g.name}`}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+                <div className="h-2.5 rounded-full bg-mist overflow-hidden mb-1.5">
+                  <div
+                    className="h-full rounded-full bg-teal transition-all"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs text-ink/60">
+                  <span>
+                    {fmt(progress)} of {fmt(g.targetAmount)}
+                  </span>
+                  <span>{pct.toFixed(0)}%</span>
+                </div>
+                {category && (
+                  <p className="text-xs text-ink/40 mt-1">Tracked via {category.label} spending</p>
+                )}
+                {g.targetDate && (
+                  <p className="text-xs text-ink/40 mt-0.5">
+                    By {new Date(g.targetDate).toLocaleDateString(undefined, { month: "short", year: "numeric" })}
+                  </p>
+                )}
+                {!g.linkedCategoryId && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="Update progress"
+                      value={isEditingProgress ? progressEdits[g._id] : ""}
+                      onChange={(e) =>
+                        setProgressEdits((prev) => ({ ...prev, [g._id]: e.target.value }))
+                      }
+                      onKeyDown={(e) => e.key === "Enter" && saveProgress(g._id)}
+                      className="flex-1 rounded border border-mist px-2 py-1 text-xs"
+                    />
+                    {isEditingProgress && (
+                      <button
+                        onClick={() => saveProgress(g._id)}
+                        className="rounded bg-teal text-white text-xs font-medium px-2 py-1 hover:bg-teal/90"
+                      >
+                        Save
+                      </button>
+                    )}
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

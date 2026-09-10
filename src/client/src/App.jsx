@@ -9,6 +9,7 @@ import OverviewPage from "./pages/OverviewPage.jsx";
 import ExpensesPage from "./pages/ExpensesPage.jsx";
 import IncomePage from "./pages/IncomePage.jsx";
 import BudgetsPage from "./pages/BudgetsPage.jsx";
+import GoalsPage from "./pages/GoalsPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 
 function AppShell({ onLogout }) {
@@ -33,6 +34,7 @@ function AppShell({ onLogout }) {
             {tab === "expenses" && <ExpensesPage />}
             {tab === "income" && <IncomePage />}
             {tab === "budgets" && <BudgetsPage />}
+            {tab === "goals" && <GoalsPage />}
             {tab === "settings" && <SettingsPage onLogout={onLogout} />}
           </div>
         )}

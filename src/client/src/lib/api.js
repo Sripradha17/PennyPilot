@@ -80,4 +80,9 @@ export const api = {
   deleteCategory: (id) => request(`/categories/${id}`, { method: "DELETE" }),
 
   resetAll: () => request("/reset", { method: "POST" }),
+
+  getGoals: () => request("/goals"),
+  createGoal: (data) => request("/goals", { method: "POST", body: JSON.stringify(data) }),
+  updateGoal: (id, data) => request(`/goals/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  deleteGoal: (id) => request(`/goals/${id}`, { method: "DELETE" }),
 };
