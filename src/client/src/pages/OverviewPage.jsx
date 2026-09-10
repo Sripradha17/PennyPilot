@@ -1,9 +1,10 @@
 import { useMemo } from "react";
-import { Download } from "lucide-react";
+import { Download, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey } from "../lib/month.js";
 import { buildMonthlyTrends } from "../lib/trends.js";
+import { buildInsights } from "../lib/insights.js";
 import Card from "../components/Card.jsx";
 import CategoryBadge from "../components/CategoryBadge.jsx";
 import { IncomeExpenseTrendChart, SavingsInvestmentTrendChart } from "../components/TrendCharts.jsx";
@@ -41,6 +42,8 @@ export default function OverviewPage() {
     [expenses, income, selectedMonth]
   );
 
+  const insights = useMemo(() => buildInsights(expenses, categories, key), [expenses, categories, key]);
+
   function handleExport() {
     exportMonthToExcel({
       monthDate: selectedMonth,
@@ -68,6 +71,57 @@ export default function OverviewPage() {
         <IncomeExpenseTrendChart data={trendData} currency={settings.currency} />
         <SavingsInvestmentTrendChart data={trendData} currency={settings.currency} />
       </div>
+
+      {insights.hasPrevData && (insights.changes.length > 0 || insights.totalPct !== null) && (
+        <Card>
+          <h3 className="font-bold text-sm flex items-center gap-1.5 mb-3">
+            <Sparkles size={15} className="text-gold" /> What changed this month
+          </h3>
+          <ul className="space-y-2 text-sm">
+            {insights.totalPct !== null && Math.abs(insights.totalPct) >= 10 && (
+              <li className="flex items-center gap-2">
+                {insights.totalPct > 0 ? (
+                  <TrendingUp size={15} className="text-coral shrink-0" />
+                ) : (
+                  <TrendingDown size={15} className="text-teal shrink-0" />
+                )}
+                <span>
+                  Total spending is{" "}
+                  <span className={insights.totalPct > 0 ? "text-coral font-medium" : "text-teal font-medium"}>
+                    {insights.totalPct > 0 ? "up" : "down"} {Math.abs(insights.totalPct).toFixed(0)}%
+                  </span>{" "}
+                  from last month
+                </span>
+              </li>
+            )}
+            {insights.changes.map((c) => (
+              <li key={c.id} className="flex items-center gap-2">
+                {c.kind === "down" ? (
+                  <TrendingDown size={15} className="text-teal shrink-0" />
+                ) : (
+                  <TrendingUp size={15} className="text-coral shrink-0" />
+                )}
+                <span>
+                  {c.kind === "new" ? (
+                    <>
+                      New spending in <span className="font-medium">{c.label}</span>: {settings.currency}
+                      {c.delta.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-medium">{c.label}</span> is{" "}
+                      <span className={c.kind === "up" ? "text-coral font-medium" : "text-teal font-medium"}>
+                        {c.kind === "up" ? "up" : "down"} {Math.abs(c.pct).toFixed(0)}%
+                      </span>{" "}
+                      from last month
+                    </>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <h2 className="font-bold text-lg">This month's category breakdown</h2>
       <Card>
