@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Download, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
+import { Download, TrendingUp, TrendingDown, Sparkles, LayoutDashboard, PieChart } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey } from "../lib/month.js";
@@ -7,6 +7,7 @@ import { buildMonthlyTrends } from "../lib/trends.js";
 import { buildInsights } from "../lib/insights.js";
 import Card from "../components/Card.jsx";
 import CategoryBadge from "../components/CategoryBadge.jsx";
+import MoneyFactCard from "../components/MoneyFactCard.jsx";
 import { IncomeExpenseTrendChart, SavingsInvestmentTrendChart } from "../components/TrendCharts.jsx";
 import { exportMonthToExcel } from "../lib/exportExcel.js";
 
@@ -58,14 +59,18 @@ export default function OverviewPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-lg">Overview</h2>
+        <h2 className="font-bold text-lg flex items-center gap-1.5">
+          <LayoutDashboard size={18} className="text-coral" /> Overview
+        </h2>
         <button
           onClick={handleExport}
-          className="flex items-center gap-1.5 rounded-lg bg-plum text-white text-sm font-medium px-3 py-2 hover:bg-plum/90"
+          className="flex items-center gap-1.5 rounded-lg bg-plum text-white text-sm font-medium px-3 py-2 hover:bg-plum/90 hover:shadow-[0_0_0_3px_rgba(138,118,172,0.25)]"
         >
           <Download size={16} /> Export to Excel
         </button>
       </div>
+
+      <MoneyFactCard />
 
       <div className="grid sm:grid-cols-2 gap-4">
         <IncomeExpenseTrendChart data={trendData} currency={settings.currency} />
@@ -77,9 +82,18 @@ export default function OverviewPage() {
           <h3 className="font-bold text-sm flex items-center gap-1.5 mb-3">
             <Sparkles size={15} className="text-gold" /> What changed this month
           </h3>
-          <ul className="space-y-2 text-sm">
+          <ul className="space-y-1.5 text-sm">
             {insights.totalPct !== null && Math.abs(insights.totalPct) >= 10 && (
-              <li className="flex items-center gap-2">
+              <li
+                className={`relative flex items-center gap-2 py-1.5 pl-3 pr-2 rounded-lg animate-page-in ${
+                  insights.totalPct > 0 ? "bg-coral/[0.06]" : "bg-teal/[0.06]"
+                }`}
+              >
+                <span
+                  className={`absolute left-0 top-1 bottom-1 w-[3px] rounded-full ${
+                    insights.totalPct > 0 ? "bg-coral" : "bg-teal"
+                  }`}
+                />
                 {insights.totalPct > 0 ? (
                   <TrendingUp size={15} className="text-coral shrink-0" />
                 ) : (
@@ -94,8 +108,19 @@ export default function OverviewPage() {
                 </span>
               </li>
             )}
-            {insights.changes.map((c) => (
-              <li key={c.id} className="flex items-center gap-2">
+            {insights.changes.map((c, idx) => (
+              <li
+                key={c.id}
+                style={{ animationDelay: `${idx * 40}ms` }}
+                className={`relative flex items-center gap-2 py-1.5 pl-3 pr-2 rounded-lg animate-page-in ${
+                  c.kind === "down" ? "bg-teal/[0.06]" : "bg-coral/[0.06]"
+                }`}
+              >
+                <span
+                  className={`absolute left-0 top-1 bottom-1 w-[3px] rounded-full ${
+                    c.kind === "down" ? "bg-teal" : "bg-coral"
+                  }`}
+                />
                 {c.kind === "down" ? (
                   <TrendingDown size={15} className="text-teal shrink-0" />
                 ) : (
@@ -123,19 +148,21 @@ export default function OverviewPage() {
         </Card>
       )}
 
-      <h2 className="font-bold text-lg">This month's category breakdown</h2>
+      <h2 className="font-bold text-lg flex items-center gap-1.5">
+        <PieChart size={18} className="text-plum" /> This month's category breakdown
+      </h2>
       <Card>
         {byCategory.length === 0 ? (
           <p className="text-ink/50 text-sm py-6 text-center">
             No expenses yet this month — log one to see your breakdown.
           </p>
         ) : (
-          <ul className="space-y-3">
-            {byCategory.map(({ category, total }) => (
-              <li key={category.id}>
-                <div className="flex items-center justify-between mb-1">
+          <ul className="space-y-3.5">
+            {byCategory.map(({ category, total }, idx) => (
+              <li key={category.id} className="animate-page-in" style={{ animationDelay: `${idx * 35}ms` }}>
+                <div className="flex items-center justify-between mb-1.5">
                   <CategoryBadge category={category} />
-                  <span className="text-sm font-semibold">
+                  <span className="text-sm font-semibold tabular-nums">
                     {settings.currency}
                     {total.toLocaleString(undefined, { maximumFractionDigits: 2 })}{" "}
                     <span className="text-ink/40 font-normal">
@@ -143,12 +170,12 @@ export default function OverviewPage() {
                     </span>
                   </span>
                 </div>
-                <div className="h-2 rounded-full bg-mist overflow-hidden">
+                <div className="h-2.5 rounded-full bg-mist overflow-hidden">
                   <div
-                    className="h-full rounded-full"
+                    className="h-full rounded-full transition-[width] duration-700 ease-out"
                     style={{
                       width: `${(total / maxTotal) * 100}%`,
-                      backgroundColor: category.badgeColor,
+                      background: `linear-gradient(90deg, ${category.badgeColor}cc, ${category.badgeColor})`,
                     }}
                   />
                 </div>

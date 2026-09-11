@@ -17,6 +17,23 @@ export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+// Reads the email straight out of the JWT payload for display purposes only
+// (no signature check needed client-side — the server verifies on every
+// request). Tokens issued before the payload carried an email fall back to
+// null gracefully instead of throwing.
+export function getCurrentUserEmail() {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const payloadPart = token.split(".")[1];
+    const base64 = payloadPart.replace(/-/g, "+").replace(/_/g, "/").padEnd(payloadPart.length + ((4 - (payloadPart.length % 4)) % 4), "=");
+    const payload = JSON.parse(atob(base64));
+    return payload.email || null;
+  } catch {
+    return null;
+  }
+}
+
 async function request(path, options = {}) {
   const token = getToken();
   const res = await fetch(`${BASE}${path}`, {

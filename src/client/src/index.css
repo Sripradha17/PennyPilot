@@ -8,8 +8,16 @@
   color-scheme: dark;
 }
 
+/* Soft, organic color blobs behind the whole app instead of a flat void —
+   muted (never neon/fluorescent), fixed so they don't scroll with content. */
 body {
-  background-color: #000000;
+  background-color: #030303;
+  background-image:
+    radial-gradient(circle 620px at 8% 6%, rgba(201, 119, 107, 0.16), transparent 70%),
+    radial-gradient(circle 560px at 95% 10%, rgba(74, 145, 134, 0.15), transparent 70%),
+    radial-gradient(circle 640px at 15% 92%, rgba(138, 118, 172, 0.12), transparent 70%),
+    radial-gradient(circle 520px at 100% 88%, rgba(201, 154, 82, 0.10), transparent 70%);
+  background-attachment: fixed;
   color: #e6e5ea;
   @apply font-body;
 }

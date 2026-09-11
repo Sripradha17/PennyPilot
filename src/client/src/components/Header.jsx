@@ -1,6 +1,5 @@
 import { LogOut } from "lucide-react";
 import MonthNavigator from "./MonthNavigator.jsx";
-import RaccoonMascot from "./RaccoonMascot.jsx";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey } from "../lib/month.js";
@@ -21,7 +20,6 @@ export default function Header({ onLogout }) {
     <header className="sticky top-0 z-20 bg-surface text-ink shadow-soft border-b border-mist">
       <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-1.5">
-          <RaccoonMascot size={34} className="shrink-0" />
           <span className="font-display font-extrabold text-xl tracking-tight">Budget Raccoon</span>
         </div>
         <MonthNavigator />

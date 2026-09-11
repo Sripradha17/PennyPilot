@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Repeat, Users, AlertTriangle, Target } from "lucide-react";
+import { Repeat, Users, Flag, Landmark, Sparkles, Globe2, Bell } from "lucide-react";
 
 const SLIDES = [
   {
@@ -13,14 +13,29 @@ const SLIDES = [
     body: "Track who paid for what, together — no spreadsheets passed back and forth.",
   },
   {
-    icon: AlertTriangle,
-    title: "Catches duplicates",
-    body: "Flags suspicious double-entries before they quietly wreck your numbers.",
+    icon: Flag,
+    title: "Goals that show progress",
+    body: "Set a savings target and watch it fill in as you go — linked to real spending.",
   },
   {
-    icon: Target,
-    title: "Budgets that stick",
-    body: "Set an allocation once — it carries forward every month until you change it.",
+    icon: Landmark,
+    title: "Net worth, no bank linking",
+    body: "Calculated straight from your income and spending — nothing to connect, nothing to trust a third party with.",
+  },
+  {
+    icon: Sparkles,
+    title: "Spots the changes for you",
+    body: "A monthly heads-up on what moved — which categories crept up or dropped since last month.",
+  },
+  {
+    icon: Globe2,
+    title: "Handles other currencies",
+    body: "Paid in a different currency while traveling? Log it as-is — it converts automatically.",
+  },
+  {
+    icon: Bell,
+    title: "A nudge before it's due",
+    body: "A push notification the day before a recurring bill hits, so nothing sneaks up on you.",
   },
 ];
 

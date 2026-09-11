@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Download, Check } from "lucide-react";
+import { Download, Check, Target } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey } from "../lib/month.js";
@@ -88,7 +88,9 @@ export default function BudgetsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-lg">Monthly budgets</h2>
+        <h2 className="font-bold text-lg flex items-center gap-1.5">
+          <Target size={18} className="text-coral" /> Monthly budgets
+        </h2>
         <button
           onClick={handleExport}
           className="flex items-center gap-1.5 rounded-lg bg-plum text-white text-sm font-medium px-3 py-2 hover:bg-plum/90"
@@ -158,7 +160,7 @@ export default function BudgetsPage() {
       </Card>
 
       <div className="grid sm:grid-cols-2 gap-4">
-        {categories.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((c) => {
+        {categories.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((c, idx) => {
           const budget = getEffectiveBudget(settings, c.id, key);
           const oneTime = isOneTimeBudget(settings, c.id, key);
           const spent = spentByCategory[c.id] || 0;
@@ -196,7 +198,11 @@ export default function BudgetsPage() {
           }
 
           return (
-            <Card key={c.id} className="hover:bg-surface2 hover:-translate-y-0.5 transition-all duration-200">
+            <Card
+              key={c.id}
+              className="hover:bg-surface2 hover:-translate-y-0.5 transition-all duration-200 animate-page-in"
+              style={{ animationDelay: `${idx * 40}ms` }}
+            >
               <div className="flex items-center justify-between mb-2">
                 <CategoryBadge category={c} />
                 {editingId === c.id ? (

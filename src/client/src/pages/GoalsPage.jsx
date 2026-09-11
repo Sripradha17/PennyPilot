@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Plus, Trash2, Target } from "lucide-react";
+import { Plus, Trash2, Target, PiggyBank, PartyPopper } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { fromInputDate } from "../lib/month.js";
 import Card from "../components/Card.jsx";
@@ -64,7 +64,9 @@ export default function GoalsPage() {
   return (
     <div className="space-y-5">
       <Card>
-        <h2 className="font-bold text-lg mb-3">New savings goal</h2>
+        <h2 className="font-bold text-lg mb-3 flex items-center gap-1.5">
+          <PiggyBank size={18} className="text-coral" /> New savings goal
+        </h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-5 gap-3">
           <input
             type="text"
@@ -118,17 +120,28 @@ export default function GoalsPage() {
         </Card>
       ) : (
         <div className="grid sm:grid-cols-2 gap-4">
-          {goals.map((g) => {
+          {goals.map((g, idx) => {
             const progress = progressByGoal[g._id] || 0;
             const pct = g.targetAmount > 0 ? Math.min(100, (progress / g.targetAmount) * 100) : 0;
+            const reached = pct >= 100;
             const category = categories.find((c) => c.id === g.linkedCategoryId);
             const isEditingProgress = progressEdits[g._id] !== undefined;
 
             return (
-              <Card key={g._id}>
+              <Card
+                key={g._id}
+                className={`animate-page-in hover:-translate-y-0.5 transition-all duration-200 ${
+                  reached ? "border border-gold/40 bg-gold/[0.05]" : ""
+                }`}
+                style={{ animationDelay: `${idx * 50}ms` }}
+              >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <Target size={16} className="text-teal shrink-0" />
+                    {reached ? (
+                      <PartyPopper size={16} className="text-gold shrink-0" />
+                    ) : (
+                      <Target size={16} className="text-teal shrink-0" />
+                    )}
                     <span className="font-semibold text-sm truncate">{g.name}</span>
                   </div>
                   <button
@@ -141,7 +154,9 @@ export default function GoalsPage() {
                 </div>
                 <div className="h-2.5 rounded-full bg-mist overflow-hidden mb-1.5">
                   <div
-                    className="h-full rounded-full bg-teal transition-all"
+                    className={`h-full rounded-full transition-[width] duration-700 ease-out ${
+                      reached ? "bg-gradient-to-r from-gold to-teal" : "bg-teal"
+                    }`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -149,7 +164,9 @@ export default function GoalsPage() {
                   <span>
                     {fmt(progress)} of {fmt(g.targetAmount)}
                   </span>
-                  <span>{pct.toFixed(0)}%</span>
+                  <span className={reached ? "text-gold font-semibold" : ""}>
+                    {reached ? "Goal reached!" : `${pct.toFixed(0)}%`}
+                  </span>
                 </div>
                 {category && (
                   <p className="text-xs text-ink/40 mt-1">Tracked via {category.label} spending</p>

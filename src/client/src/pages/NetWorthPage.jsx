@@ -3,7 +3,6 @@ import { TrendingUp, TrendingDown, Sparkles } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import Card from "../components/Card.jsx";
 import CategoryBadge from "../components/CategoryBadge.jsx";
-import { RaccoonCoins } from "../components/RaccoonMascot.jsx";
 
 // Money moved into an Investment/Savings-flavored category isn't "spent" —
 // it's still yours, just in a different form — so it's excluded from
@@ -60,8 +59,8 @@ export default function NetWorthPage() {
           {fmt(Math.abs(totals.netWorth))}
         </p>
         <p className="text-xs text-ink/40 mt-1.5 max-w-xs mx-auto">
-          All-time income minus everyday spending. Money you've moved into Investment or Savings
-          categories still counts as yours, not as spent.
+          Everything you've earned, minus everyday spending. Money in your Investment and Savings
+          categories always counts toward this — it's never treated as spent.
         </p>
       </Card>
 
@@ -73,7 +72,7 @@ export default function NetWorthPage() {
           </p>
         </Card>
         <Card>
-          <p className="text-xs text-ink/50 uppercase mb-1">Total spending, all time</p>
+          <p className="text-xs text-ink/50 uppercase mb-1">Everyday spending, all time</p>
           <p className="font-display font-bold text-xl text-coral flex items-center gap-1.5">
             <TrendingDown size={18} /> {fmt(totals.spending)}
           </p>
@@ -86,7 +85,6 @@ export default function NetWorthPage() {
         </h2>
         {wealthByCategory.length === 0 ? (
           <div className="flex flex-col items-center py-6 gap-2">
-            <RaccoonCoins size={96} />
             <p className="text-ink/50 text-sm text-center">
               Nothing logged in an Investment or Savings category yet.
             </p>

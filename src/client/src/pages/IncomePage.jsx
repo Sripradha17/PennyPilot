@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Wallet, Users, PiggyBank } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey, toInputDate, fromInputDate } from "../lib/month.js";
@@ -86,22 +86,15 @@ export default function IncomePage() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-3 gap-3">
-        <Card className="text-center">
-          <p className="text-xs text-ink/50 uppercase">{settings.myLabel}</p>
-          <p className="font-display font-bold text-lg text-teal">{fmt(totals.mine)}</p>
-        </Card>
-        <Card className="text-center">
-          <p className="text-xs text-ink/50 uppercase">{settings.spouseLabel}</p>
-          <p className="font-display font-bold text-lg text-teal">{fmt(totals.spouse)}</p>
-        </Card>
-        <Card className="text-center">
-          <p className="text-xs text-ink/50 uppercase">Combined</p>
-          <p className="font-display font-bold text-lg text-plum">{fmt(totals.combined)}</p>
-        </Card>
+        <IncomeStatCard label={settings.myLabel} value={fmt(totals.mine)} icon={Wallet} tone="teal" />
+        <IncomeStatCard label={settings.spouseLabel} value={fmt(totals.spouse)} icon={Wallet} tone="teal" />
+        <IncomeStatCard label="Combined" value={fmt(totals.combined)} icon={Users} tone="plum" />
       </div>
 
       <Card>
-        <h2 className="font-bold text-lg mb-3">Log income</h2>
+        <h2 className="font-bold text-lg mb-3 flex items-center gap-1.5">
+          <PiggyBank size={18} className="text-teal" /> Log income
+        </h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-5 gap-3">
           <input
             type="date"
@@ -150,32 +143,40 @@ export default function IncomePage() {
         {monthIncome.length === 0 ? (
           <p className="text-ink/50 text-sm py-6 text-center">No income logged yet.</p>
         ) : (
-          <ul className="divide-y divide-mist">
+          <ul className="rounded-xl border border-mist/70 divide-y divide-mist overflow-hidden">
             {pageIncome.map((i) => (
               <li
                 key={i._id}
-                className="flex items-center justify-between py-2.5 gap-3 px-2 -mx-2 rounded-lg hover:bg-mist/50 transition-colors duration-150"
+                className="relative flex items-center justify-between py-2.5 gap-3 pl-4 pr-3 hover:bg-mist/40 transition-colors duration-150 group"
               >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">
-                    {i.person === "mine" ? settings.myLabel : settings.spouseLabel}
-                  </p>
-                  <p className="text-xs text-ink/50">
-                    {new Date(i.date).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                    })}
-                    {i.note ? ` · ${i.note}` : ""}
-                  </p>
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-teal/70" />
+                <div className="min-w-0 flex items-center gap-2.5">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-teal/15 text-teal shrink-0">
+                    <Wallet size={14} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">
+                      {i.person === "mine" ? settings.myLabel : settings.spouseLabel}
+                    </p>
+                    <p className="text-xs text-ink/50 truncate">
+                      {new Date(i.date).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                      {i.note ? ` · ${i.note}` : ""}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="font-semibold">{fmt(i.amount)}</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="font-display font-bold text-sm tabular-nums text-teal">
+                    +{fmt(i.amount)}
+                  </span>
                   <button
                     onClick={() => handleDeleteIncome(i)}
-                    className="text-ink/30 hover:text-red-500 transition"
+                    className="text-ink/20 group-hover:text-ink/40 hover:!text-red-500 transition"
                     aria-label="Delete income"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </li>
@@ -188,5 +189,23 @@ export default function IncomePage() {
         <UndoToast message={pendingDelete.label} onUndo={undoDelete} onDismiss={dismissUndo} />
       )}
     </div>
+  );
+}
+
+function IncomeStatCard({ label, value, icon: Icon, tone }) {
+  const toneClasses = {
+    teal: { bg: "bg-teal/[0.07]", border: "border-teal/20", text: "text-teal", chip: "bg-teal/15" },
+    plum: { bg: "bg-plum/[0.07]", border: "border-plum/20", text: "text-plum", chip: "bg-plum/15" },
+  }[tone];
+  return (
+    <Card className={`${toneClasses.bg} border ${toneClasses.border} text-center`}>
+      <div className={`mx-auto mb-1.5 flex items-center justify-center w-8 h-8 rounded-full ${toneClasses.chip} ${toneClasses.text}`}>
+        <Icon size={15} />
+      </div>
+      <p className="text-[11px] text-ink/50 uppercase tracking-wide truncate">{label}</p>
+      <p key={value} className={`font-display font-bold text-lg tabular-nums animate-page-in ${toneClasses.text}`}>
+        {value}
+      </p>
+    </Card>
   );
 }

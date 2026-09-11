@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import { api } from "../lib/api.js";
-import RaccoonMascot from "../components/RaccoonMascot.jsx";
 import AboutCarousel from "../components/AboutCarousel.jsx";
+import MoneyFactCard from "../components/MoneyFactCard.jsx";
 
 export default function LoginPage({ onLoggedIn }) {
   const [mode, setMode] = useState("login"); // "login" | "signup"
@@ -34,12 +34,12 @@ export default function LoginPage({ onLoggedIn }) {
       <div className="w-full max-w-4xl flex flex-col sm:flex-row items-center gap-10 sm:gap-14">
         <div className="flex flex-col items-center sm:items-start gap-4 sm:flex-1">
           <div className="flex flex-col items-center sm:items-start gap-1">
-            <RaccoonMascot size={128} />
             <span className="font-display font-extrabold text-2xl tracking-tight mt-1">
               Budget Raccoon
             </span>
           </div>
           <AboutCarousel />
+          <MoneyFactCard className="w-full max-w-xs" />
         </div>
 
         <form

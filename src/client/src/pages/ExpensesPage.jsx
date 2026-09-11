@@ -1,5 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { Trash2, Plus, Pencil, X, Check, Search, AlertTriangle, Upload, Repeat } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  Pencil,
+  X,
+  Check,
+  Search,
+  AlertTriangle,
+  Upload,
+  Repeat,
+  TrendingUp,
+  TrendingDown,
+  Scale,
+  Receipt as ReceiptIcon,
+  Wallet,
+} from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey, toInputDate, fromInputDate } from "../lib/month.js";
@@ -235,26 +250,31 @@ export default function ExpensesPage() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-3 gap-3">
-        <Card className="text-center">
-          <p className="text-xs text-ink/50 uppercase">Income</p>
-          <p className="font-display font-bold text-lg text-teal">{fmt(totals.income)}</p>
-        </Card>
-        <Card className="text-center">
-          <p className="text-xs text-ink/50 uppercase">Expenses</p>
-          <p className="font-display font-bold text-lg text-coral">{fmt(totals.expenses)}</p>
-        </Card>
-        <Card className="text-center">
-          <p className="text-xs text-ink/50 uppercase">Difference</p>
-          <p className={`font-display font-bold text-lg ${totals.diff < 0 ? "text-coral" : "text-teal"}`}>
-            {totals.diff < 0 ? "-" : ""}
-            {fmt(Math.abs(totals.diff))}
-          </p>
-        </Card>
+        <StatCard
+          label="Income"
+          value={fmt(totals.income)}
+          icon={TrendingUp}
+          tone="teal"
+        />
+        <StatCard
+          label="Expenses"
+          value={fmt(totals.expenses)}
+          icon={TrendingDown}
+          tone="coral"
+        />
+        <StatCard
+          label="Difference"
+          value={`${totals.diff < 0 ? "-" : ""}${fmt(Math.abs(totals.diff))}`}
+          icon={Scale}
+          tone={totals.diff < 0 ? "coral" : "teal"}
+        />
       </div>
 
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <h2 className="font-bold text-lg">Log an expense</h2>
+          <h2 className="font-bold text-lg flex items-center gap-1.5">
+            <Wallet size={18} className="text-coral" /> Log an expense
+          </h2>
           <div className="flex items-center gap-3">
             {duplicateGroups.length > 0 && (
               <button
@@ -450,15 +470,16 @@ export default function ExpensesPage() {
           <div className="space-y-4">
             {dayGroups.map((group) => (
               <div key={group.dayKey}>
-                <div className="flex items-center justify-between px-1 mb-1">
-                  <span className="text-xs font-semibold text-ink/50 uppercase tracking-wide">
+                <div className="flex items-center justify-between px-1 mb-1.5 pb-1 border-b border-dashed border-mist">
+                  <span className="text-xs font-semibold text-ink/50 uppercase tracking-wide flex items-center gap-1.5">
+                    <ReceiptIcon size={12} className="text-ink/30" />
                     {new Date(group.date).toLocaleDateString(undefined, {
                       weekday: "short",
                       month: "short",
                       day: "numeric",
                     })}
                   </span>
-                  <span className="text-xs font-medium text-ink/40">
+                  <span className="text-xs font-semibold text-ink/50 tabular-nums">
                     {settings.currency}
                     {group.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                   </span>
@@ -545,9 +566,31 @@ export default function ExpensesPage() {
   );
 }
 
+function StatCard({ label, value, icon: Icon, tone }) {
+  const toneClasses = {
+    teal: { bg: "bg-teal/[0.07]", border: "border-teal/20", text: "text-teal", chip: "bg-teal/15" },
+    coral: { bg: "bg-coral/[0.07]", border: "border-coral/20", text: "text-coral", chip: "bg-coral/15" },
+  }[tone];
+  return (
+    <Card className={`${toneClasses.bg} border ${toneClasses.border} text-center relative overflow-hidden`}>
+      <div className={`mx-auto mb-1.5 flex items-center justify-center w-8 h-8 rounded-full ${toneClasses.chip} ${toneClasses.text}`}>
+        <Icon size={15} />
+      </div>
+      <p className="text-[11px] text-ink/50 uppercase tracking-wide">{label}</p>
+      <p key={value} className={`font-display font-bold text-lg tabular-nums animate-page-in ${toneClasses.text}`}>
+        {value}
+      </p>
+    </Card>
+  );
+}
+
 function ExpenseRow({ expense: e, category, settings, showDate, onEdit, onDelete }) {
   return (
-    <li className="flex items-center gap-3 py-2.5 px-3 hover:bg-mist/40 transition-colors duration-150">
+    <li className="relative flex items-center gap-3 py-2.5 pl-4 pr-3 hover:bg-mist/40 transition-colors duration-150 group">
+      <span
+        className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full"
+        style={{ backgroundColor: category?.badgeColor || "#4a4a55" }}
+      />
       <CategoryBadge category={category} />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-ink truncate flex items-center gap-1.5">
@@ -573,14 +616,22 @@ function ExpenseRow({ expense: e, category, settings, showDate, onEdit, onDelete
         </p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <span className="font-semibold text-sm tabular-nums">
-          {settings.currency}
+        <span className="font-display font-bold text-sm tabular-nums text-coral">
+          −{settings.currency}
           {e.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
         </span>
-        <button onClick={onEdit} className="text-ink/30 hover:text-plum transition" aria-label="Edit expense">
+        <button
+          onClick={onEdit}
+          className="text-ink/20 group-hover:text-ink/40 hover:!text-plum transition"
+          aria-label="Edit expense"
+        >
           <Pencil size={15} />
         </button>
-        <button onClick={onDelete} className="text-ink/30 hover:text-red-500 transition" aria-label="Delete expense">
+        <button
+          onClick={onDelete}
+          className="text-ink/20 group-hover:text-ink/40 hover:!text-red-500 transition"
+          aria-label="Delete expense"
+        >
           <Trash2 size={15} />
         </button>
       </div>

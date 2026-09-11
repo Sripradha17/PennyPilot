@@ -1,14 +1,18 @@
-import { useEffect, useState } from "react";
-import { Plus, Trash2, AlertTriangle, LogOut, Bell, BellOff } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, Trash2, AlertTriangle, LogOut, Bell, BellOff, Download, Mail } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { colorForNewCategory } from "../lib/categories.js";
-import { clearToken } from "../lib/api.js";
+import { clearToken, getCurrentUserEmail } from "../lib/api.js";
 import { enableBillReminders, disableBillReminders, getBillReminderStatus } from "../lib/push.js";
+import { CURRENCIES } from "../lib/currency.js";
+import { exportExpensesCsv, exportIncomeCsv } from "../lib/exportData.js";
 import Card from "../components/Card.jsx";
 import CategoryBadge from "../components/CategoryBadge.jsx";
 
 export default function SettingsPage({ onLogout }) {
   const {
+    expenses,
+    income,
     settings,
     customCategories,
     categories,
@@ -20,8 +24,15 @@ export default function SettingsPage({ onLogout }) {
   } = useData();
 
   const [currency, setCurrency] = useState(settings.currency);
+  const [baseCurrencyCode, setBaseCurrencyCode] = useState(settings.baseCurrencyCode);
   const [myLabel, setMyLabel] = useState(settings.myLabel);
   const [spouseLabel, setSpouseLabel] = useState(settings.spouseLabel);
+  const userEmail = getCurrentUserEmail();
+  const categoryById = useMemo(() => {
+    const map = {};
+    categories.forEach((c) => (map[c.id] = c));
+    return map;
+  }, [categories]);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryBudget, setNewCategoryBudget] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
@@ -56,7 +67,7 @@ export default function SettingsPage({ onLogout }) {
     e.preventDefault();
     setSaving(true);
     try {
-      await updateSettings({ currency, myLabel, spouseLabel });
+      await updateSettings({ currency, baseCurrencyCode, myLabel, spouseLabel });
     } finally {
       setSaving(false);
     }
@@ -87,9 +98,24 @@ export default function SettingsPage({ onLogout }) {
 
   return (
     <div className="space-y-5">
+      {userEmail && (
+        <Card>
+          <h2 className="font-bold text-lg mb-2 flex items-center gap-1.5">
+            <Mail size={17} className="text-plum" /> Account
+          </h2>
+          <p className="text-sm text-ink/70">
+            Signed in as <span className="font-medium text-ink">{userEmail}</span>
+          </p>
+          <p className="text-xs text-ink/50 mt-1">
+            Data you add here is only ever visible to your household — no one else can see or
+            edit it.
+          </p>
+        </Card>
+      )}
+
       <Card>
         <h2 className="font-bold text-lg mb-3">General</h2>
-        <form onSubmit={handleSaveGeneral} className="grid sm:grid-cols-3 gap-3">
+        <form onSubmit={handleSaveGeneral} className="grid sm:grid-cols-4 gap-3">
           <label className="text-sm">
             Currency symbol
             <input
@@ -97,6 +123,20 @@ export default function SettingsPage({ onLogout }) {
               onChange={(e) => setCurrency(e.target.value)}
               className="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
             />
+          </label>
+          <label className="text-sm">
+            Base currency
+            <select
+              value={baseCurrencyCode}
+              onChange={(e) => setBaseCurrencyCode(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
+            >
+              {CURRENCIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="text-sm">
             Your label
@@ -114,10 +154,14 @@ export default function SettingsPage({ onLogout }) {
               className="mt-1 w-full rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
             />
           </label>
+          <p className="sm:col-span-4 text-xs text-ink/50 -mt-1">
+            Base currency is what every total, chart, and budget is calculated in. Logging an
+            expense in a different currency converts it to this one automatically.
+          </p>
           <button
             type="submit"
             disabled={saving}
-            className="sm:col-span-3 justify-self-start rounded-lg bg-coral text-white text-sm font-medium px-4 py-2 hover:bg-coral/90 disabled:opacity-50"
+            className="sm:col-span-4 justify-self-start rounded-lg bg-coral text-white text-sm font-medium px-4 py-2 hover:bg-coral/90 disabled:opacity-50"
           >
             Save
           </button>
@@ -204,6 +248,31 @@ export default function SettingsPage({ onLogout }) {
           </button>
         )}
         {pushError && <p className="text-xs text-red-400 mt-2">{pushError}</p>}
+      </Card>
+
+      <Card>
+        <h2 className="font-bold text-lg mb-1 flex items-center gap-1.5">
+          <Download size={17} className="text-gold" /> Export your data
+        </h2>
+        <p className="text-xs text-ink/50 mb-3">
+          Download everything as CSV — for your own records, or to open in a spreadsheet.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => exportExpensesCsv(expenses, categoryById, settings)}
+            disabled={expenses.length === 0}
+            className="rounded-lg border border-mist text-sm font-medium px-4 py-2 hover:bg-mist/40 disabled:opacity-40"
+          >
+            Expenses ({expenses.length})
+          </button>
+          <button
+            onClick={() => exportIncomeCsv(income, settings)}
+            disabled={income.length === 0}
+            className="rounded-lg border border-mist text-sm font-medium px-4 py-2 hover:bg-mist/40 disabled:opacity-40"
+          >
+            Income ({income.length})
+          </button>
+        </div>
       </Card>
 
       <Card>

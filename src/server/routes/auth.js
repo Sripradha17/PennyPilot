@@ -8,7 +8,7 @@ const router = Router();
 
 function signToken(user) {
   return jwt.sign(
-    { userId: user._id.toString(), householdId: user.householdId.toString() },
+    { userId: user._id.toString(), householdId: user.householdId.toString(), email: user.email },
     process.env.JWT_SECRET,
     { expiresIn: "90d" }
   );
