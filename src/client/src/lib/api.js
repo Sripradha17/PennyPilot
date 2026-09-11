@@ -3,7 +3,7 @@
 // Local dev has no VITE_API_URL, so it falls back to the relative path Vite proxies to
 // localhost:5000 (see vite.config.js).
 const BASE = import.meta.env.VITE_API_URL || "/api";
-const TOKEN_KEY = "pennypilot_token";
+const TOKEN_KEY = "budget_raccoon_token";
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -28,7 +28,7 @@ async function request(path, options = {}) {
   });
   if (res.status === 401) {
     clearToken();
-    window.dispatchEvent(new Event("pennypilot:unauthorized"));
+    window.dispatchEvent(new Event("budget-raccoon:unauthorized"));
     throw new Error("Not logged in");
   }
   if (!res.ok) {
@@ -85,10 +85,6 @@ export const api = {
   createGoal: (data) => request("/goals", { method: "POST", body: JSON.stringify(data) }),
   updateGoal: (id, data) => request(`/goals/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteGoal: (id) => request(`/goals/${id}`, { method: "DELETE" }),
-
-  getBalances: () => request("/balances"),
-  createBalance: (data) => request("/balances", { method: "POST", body: JSON.stringify(data) }),
-  deleteBalance: (id) => request(`/balances/${id}`, { method: "DELETE" }),
 
   subscribePush: (subscription) =>
     request("/push/subscribe", { method: "POST", body: JSON.stringify({ subscription }) }),

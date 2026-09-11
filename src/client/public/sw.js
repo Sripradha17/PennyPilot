@@ -1,7 +1,7 @@
 // App-shell caching: always try the network first (this app needs live data), and
 // fall back to whatever's cached when offline. Never touches /api/ requests — those
 // must always hit the real server or fail outright, not serve stale financial data.
-const CACHE_NAME = "pennypilot-shell-v1";
+const CACHE_NAME = "budget-raccoon-shell-v1";
 
 self.addEventListener("install", () => {
   self.skipWaiting();

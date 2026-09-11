@@ -53,8 +53,8 @@ export default function App() {
       clearToken();
       setAuthed(false);
     }
-    window.addEventListener("pennypilot:unauthorized", handleUnauthorized);
-    return () => window.removeEventListener("pennypilot:unauthorized", handleUnauthorized);
+    window.addEventListener("budget-raccoon:unauthorized", handleUnauthorized);
+    return () => window.removeEventListener("budget-raccoon:unauthorized", handleUnauthorized);
   }, []);
 
   if (!authed) {

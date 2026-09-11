@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: pennypilot-api
+    name: budget-raccoon-api
     env: node
     plan: free
     buildCommand: npm install
