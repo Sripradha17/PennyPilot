@@ -10,7 +10,6 @@ export function DataProvider({ children }) {
   const [income, setIncome] = useState([]);
   const [customCategories, setCustomCategories] = useState([]);
   const [goals, setGoals] = useState([]);
-  const [balances, setBalances] = useState([]);
   const [settings, setSettings] = useState({
     currency: "$",
     baseCurrencyCode: "USD",
@@ -27,20 +26,17 @@ export function DataProvider({ children }) {
   const refreshAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [expensesData, incomeData, categoriesData, settingsData, goalsData, balancesData] =
-        await Promise.all([
-          api.getExpenses(),
-          api.getIncome(),
-          api.getCategories(),
-          api.getSettings(),
-          api.getGoals(),
-          api.getBalances(),
-        ]);
+      const [expensesData, incomeData, categoriesData, settingsData, goalsData] = await Promise.all([
+        api.getExpenses(),
+        api.getIncome(),
+        api.getCategories(),
+        api.getSettings(),
+        api.getGoals(),
+      ]);
       setExpenses(expensesData);
       setIncome(incomeData);
       setCustomCategories(categoriesData);
       setGoals(goalsData);
-      setBalances(balancesData);
       setSettings({
         currency: settingsData.currency,
         baseCurrencyCode: settingsData.baseCurrencyCode || "USD",
@@ -165,23 +161,12 @@ export function DataProvider({ children }) {
     setGoals((prev) => prev.filter((g) => g._id !== id));
   }, []);
 
-  const addBalance = useCallback(async (data) => {
-    const created = await api.createBalance(data);
-    setBalances((prev) => [created, ...prev]);
-  }, []);
-
-  const removeBalance = useCallback(async (id) => {
-    await api.deleteBalance(id);
-    setBalances((prev) => prev.filter((b) => b._id !== id));
-  }, []);
-
   const value = {
     expenses,
     income,
     categories,
     customCategories,
     goals,
-    balances,
     settings,
     loading,
     error,
@@ -201,8 +186,6 @@ export function DataProvider({ children }) {
     addGoal,
     updateGoal,
     removeGoal,
-    addBalance,
-    removeBalance,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
