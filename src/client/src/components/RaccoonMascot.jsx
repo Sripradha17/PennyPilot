@@ -1,13 +1,15 @@
-// Hand-drawn (not emoji) raccoon mascot family — soft rounded "kawaii" style
-// (no heavy bandit mask, closed happy eyes, connected white belly/chin patch,
-// striped tail, grounded with a soft shadow), inspired directly by a
-// reference sheet the user provided. Every shape gets a gentle outline so
-// limbs read clearly against the app's black background.
-const OUTLINE = "#4a4a55";
+// Hand-drawn (not emoji) raccoon mascot family. Two features make something
+// actually read as a raccoon rather than a generic bear cub: a dark mask
+// across the eyes, and a bold ringed tail — both were missing from an
+// earlier pass that over-corrected toward a maskless "soft" style. This
+// version keeps the mask (with light closed-eye crescents sitting on top of
+// it, cartoon-style) and a much bigger, clearly-banded tail.
+const OUTLINE = "#33333c";
 const BODY = "#b3b3bf";
 const BODY_SHADE = "#96969f";
+const MASK = "#3f3f4a";
 const BELLY = "#f5f3f0";
-const NOSE = "#3a3a44";
+const NOSE = "#26262e";
 const VEST = "#c9776b";
 const COIN = "#c99a52";
 
@@ -20,32 +22,43 @@ function Shadow() {
 function Ears() {
   return (
     <>
-      <circle cx="60" cy="60" r="25" fill={BODY} {...S} />
-      <circle cx="62" cy="63" r="12" fill={BELLY} />
-      <circle cx="140" cy="60" r="25" fill={BODY} {...S} />
-      <circle cx="138" cy="63" r="12" fill={BELLY} />
+      <circle cx="60" cy="58" r="25" fill={BODY} {...S} />
+      <circle cx="62" cy="61" r="12" fill={BELLY} />
+      <circle cx="140" cy="58" r="25" fill={BODY} {...S} />
+      <circle cx="138" cy="61" r="12" fill={BELLY} />
     </>
   );
 }
 
-// Closed, happy curved eyes instead of round pupils — matches the reference's
-// friendlier "always smiling" expression.
+// The raccoon's signature dark mask — two overlapping patches forming one
+// continuous band across the eyes.
+function Mask() {
+  return (
+    <>
+      <ellipse cx="79" cy="97" rx="27" ry="20" fill={MASK} />
+      <ellipse cx="121" cy="97" rx="27" ry="20" fill={MASK} />
+    </>
+  );
+}
+
+// Closed, happy curved eyes drawn light-on-dark so they read clearly against
+// the mask, cartoon-raccoon style.
 function HappyEyes() {
   return (
     <>
-      <path d="M72 98 Q80 90 88 98" stroke={NOSE} strokeWidth="4.5" strokeLinecap="round" fill="none" />
-      <path d="M112 98 Q120 90 128 98" stroke={NOSE} strokeWidth="4.5" strokeLinecap="round" fill="none" />
+      <path d="M68 96 Q79 84 90 96" stroke={BELLY} strokeWidth="5" strokeLinecap="round" fill="none" />
+      <path d="M110 96 Q121 84 132 96" stroke={BELLY} strokeWidth="5" strokeLinecap="round" fill="none" />
     </>
   );
 }
 
 function OpenEyes({ className = "" }) {
   return (
-    <g className={className} style={{ transformOrigin: "100px 100px" }}>
-      <circle cx="80" cy="99" r="7" fill={NOSE} />
-      <circle cx="82.5" cy="96.5" r="2" fill="#fff" />
-      <circle cx="120" cy="99" r="7" fill={NOSE} />
-      <circle cx="122.5" cy="96.5" r="2" fill="#fff" />
+    <g className={className} style={{ transformOrigin: "100px 97px" }}>
+      <circle cx="79" cy="97" r="10" fill={BELLY} {...S} />
+      <circle cx="79" cy="97" r="5" fill={NOSE} />
+      <circle cx="121" cy="97" r="10" fill={BELLY} {...S} />
+      <circle cx="121" cy="97" r="5" fill={NOSE} />
     </g>
   );
 }
@@ -54,28 +67,31 @@ function Head({ eyes = "happy" }) {
   return (
     <>
       <circle cx="100" cy="110" r="60" fill={BODY} {...S} />
+      <Mask />
       <path
-        d="M100 74 C128 74 142 96 138 118 C134 142 118 148 100 148 C82 148 66 142 62 118 C58 96 72 74 100 74 Z"
+        d="M100 104 C124 102 136 120 132 140 C128 158 115 162 100 162 C85 162 72 158 68 140 C64 120 76 102 100 104 Z"
         fill={BELLY}
       />
       {eyes === "happy" ? <HappyEyes /> : <OpenEyes className="rc-eyes" />}
-      <ellipse cx="100" cy="118" rx="6.5" ry="4.5" fill={NOSE} />
-      <path d="M100 122 Q100 127 94 128" stroke={NOSE} strokeWidth="3" strokeLinecap="round" fill="none" />
-      <path d="M100 122 Q100 127 106 128" stroke={NOSE} strokeWidth="3" strokeLinecap="round" fill="none" />
+      <ellipse cx="100" cy="126" rx="6.5" ry="4.5" fill={NOSE} />
+      <path d="M100 130 Q100 135 94 136" stroke={NOSE} strokeWidth="3" strokeLinecap="round" fill="none" />
+      <path d="M100 130 Q100 135 106 136" stroke={NOSE} strokeWidth="3" strokeLinecap="round" fill="none" />
     </>
   );
 }
 
+// Big, clearly-banded tail — the other signature raccoon feature.
 function Tail({ className }) {
   return (
     <g className={className}>
       <path
-        d="M136 198 C180 195 198 142 160 106 C190 128 190 182 136 198 Z"
+        d="M130 208 C190 204 214 132 164 88 C204 114 206 190 130 208 Z"
         fill={BODY}
         {...S}
       />
-      <path d="M146 180 C168 168 178 146 165 124" stroke={BODY_SHADE} strokeWidth="12" strokeLinecap="round" fill="none" />
-      <path d="M153 152 C165 142 170 126 161 112" stroke={BODY_SHADE} strokeWidth="11" strokeLinecap="round" fill="none" />
+      <path d="M142 190 C168 176 182 150 173 124" stroke={MASK} strokeWidth="15" strokeLinecap="round" fill="none" />
+      <path d="M155 152 C170 138 177 116 166 96" stroke={MASK} strokeWidth="14" strokeLinecap="round" fill="none" />
+      <circle cx="168" cy="92" r="15" fill={MASK} {...S} />
     </g>
   );
 }
@@ -219,16 +235,19 @@ export function RaccoonSleep({ size = 128, className = "" }) {
       <ellipse cx="100" cy="215" rx="66" ry="12" fill="#000" opacity="0.35" />
       <g className="rc-figure4">
         <path d="M40 200 C30 160 55 130 100 130 C150 130 175 165 165 200 C155 225 45 225 40 200 Z" fill={BODY} {...S} />
+        <ellipse cx="83" cy="167" rx="19" ry="14" fill={MASK} />
+        <ellipse cx="115" cy="167" rx="19" ry="14" fill={MASK} />
         <path
-          d="M75 175 C90 165 115 165 128 178 C134 195 122 210 100 210 C78 210 68 192 75 175 Z"
+          d="M78 178 C88 170 112 170 122 178 C128 192 118 208 100 208 C82 208 72 192 78 178 Z"
           fill={BELLY}
         />
-        <path d="M78 168 Q86 160 94 168" stroke={NOSE} strokeWidth="4" strokeLinecap="round" fill="none" />
-        <path d="M100 172 Q108 164 116 172" stroke={NOSE} strokeWidth="4" strokeLinecap="round" fill="none" />
+        <path d="M76 167 Q84 160 92 167" stroke={BELLY} strokeWidth="4" strokeLinecap="round" fill="none" />
+        <path d="M108 167 Q116 160 124 167" stroke={BELLY} strokeWidth="4" strokeLinecap="round" fill="none" />
         <ellipse cx="100" cy="188" rx="5.5" ry="4" fill={NOSE} />
         <circle cx="52" cy="150" r="20" fill={BODY} {...S} />
         <circle cx="54" cy="152" r="9" fill={BELLY} />
         <path d="M150 165 C185 160 195 122 165 100 C188 118 186 158 150 165 Z" fill={BODY} {...S} />
+        <path d="M158 150 C172 142 178 126 170 110" stroke={MASK} strokeWidth="10" strokeLinecap="round" fill="none" />
       </g>
       <text className="rc-zzz" x="150" y="90" fontSize="22" fontWeight="700" fill={BODY}>
         z
