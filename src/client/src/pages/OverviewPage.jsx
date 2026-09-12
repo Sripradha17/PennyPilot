@@ -13,7 +13,6 @@ import BudgetOverviewCard from "../components/BudgetOverviewCard.jsx";
 import RecentActivity from "../components/RecentActivity.jsx";
 import CategoryTile from "../components/CategoryTile.jsx";
 import MoneyFactCard from "../components/MoneyFactCard.jsx";
-import { IncomeExpenseTrendChart, SavingsInvestmentTrendChart } from "../components/TrendCharts.jsx";
 import { exportMonthToExcel } from "../lib/exportExcel.js";
 
 function greeting() {
@@ -152,11 +151,6 @@ export default function OverviewPage() {
           currency={settings.currency}
         />
         <RecentActivity items={recentActivity} currency={settings.currency} />
-      </div>
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <IncomeExpenseTrendChart data={trendData} currency={settings.currency} />
-        <SavingsInvestmentTrendChart data={trendData} currency={settings.currency} />
       </div>
 
       <MoneyFactCard />

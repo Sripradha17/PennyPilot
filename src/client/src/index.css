@@ -144,6 +144,40 @@ input[type="checkbox"] {
 }
 .animate-progress-fill { animation: progress-fill 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
 
+/* ---------- Finance illustration animation primitives ---------- */
+/* Separate from the raccoon-* keyframes above — these drive the FinanceIllustration
+   system (components/illustrations/), not the mascot. */
+
+@keyframes finance-bar-grow {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.82); }
+}
+.finance-bar-grow { animation: finance-bar-grow 2.8s ease-in-out infinite; }
+
+@keyframes finance-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.25); }
+}
+.finance-pulse-dot { animation: finance-pulse-dot 2.2s ease-in-out infinite; }
+
+@keyframes finance-key-press {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(1.5px) scale(0.94); }
+}
+.finance-key-press { animation: finance-key-press 2.4s ease-in-out infinite; }
+
+@keyframes finance-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.finance-float { animation: finance-float 3.2s ease-in-out infinite; }
+
+@keyframes finance-flutter {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(3deg); }
+}
+.finance-flutter { animation: finance-flutter 3.6s ease-in-out infinite; transform-origin: 50% 0%; }
+
 /* Scroll-shadow hint for horizontally-scrollable strips */
 .scroll-fade-x {
   background: linear-gradient(to right, #FFFFFF 30%, rgba(255, 255, 255, 0)),
@@ -173,7 +207,12 @@ input[type="checkbox"] {
   .raccoon-paw,
   .animate-coin-bounce,
   .animate-coin-drop,
-  .animate-sparkle {
+  .animate-sparkle,
+  .finance-bar-grow,
+  .finance-pulse-dot,
+  .finance-key-press,
+  .finance-float,
+  .finance-flutter {
     animation: none !important;
     transition: none !important;
   }

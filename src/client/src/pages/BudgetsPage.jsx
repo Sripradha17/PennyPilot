@@ -4,8 +4,9 @@ import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey } from "../lib/month.js";
 import Card from "../components/Card.jsx";
-import CategoryBadge from "../components/CategoryBadge.jsx";
 import Pagination from "../components/Pagination.jsx";
+import BudgetCategoryRow from "../components/BudgetCategoryRow.jsx";
+import FinanceIllustration from "../components/illustrations/FinanceIllustration.jsx";
 import { exportMonthToExcel } from "../lib/exportExcel.js";
 import { getEffectiveBudget, isOneTimeBudget } from "../lib/budgets.js";
 
@@ -87,6 +88,8 @@ export default function BudgetsPage() {
 
   return (
     <div className="space-y-4">
+      <FinanceIllustration type="budget" size={110} className="hidden sm:block" />
+
       <div className="flex items-center justify-between">
         <h2 className="font-bold text-lg flex items-center gap-1.5">
           <Target size={18} className="text-coral" /> Monthly budgets
@@ -159,8 +162,8 @@ export default function BudgetsPage() {
         )}
       </Card>
 
-      <div className="grid sm:grid-cols-2 gap-4">
-        {categories.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((c, idx) => {
+      <ul className="rounded-xl border border-mist/70 divide-y divide-mist overflow-hidden">
+        {categories.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((c) => {
           const budget = getEffectiveBudget(settings, c.id, key);
           const oneTime = isOneTimeBudget(settings, c.id, key);
           const spent = spentByCategory[c.id] || 0;
@@ -198,68 +201,27 @@ export default function BudgetsPage() {
           }
 
           return (
-            <Card
+            <BudgetCategoryRow
               key={c.id}
-              className="hover:bg-surface2 hover:-translate-y-0.5 transition-all duration-200 animate-page-in"
-              style={{ animationDelay: `${idx * 40}ms` }}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <CategoryBadge category={c} />
-                {editingId === c.id ? (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      autoFocus
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && saveEdit(c.id)}
-                      className="w-20 rounded border border-mist px-2 py-1 text-sm"
-                    />
-                    <label className="flex items-center gap-1 text-xs text-ink/60">
-                      <input
-                        type="checkbox"
-                        checked={editRecurring}
-                        onChange={(e) => setEditRecurring(e.target.checked)}
-                      />
-                      Recurring
-                    </label>
-                    <button
-                      onClick={() => saveEdit(c.id)}
-                      className="rounded bg-teal text-white text-xs font-medium px-2 py-1 hover:bg-teal/90"
-                    >
-                      Save
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => startEdit(c)}
-                    className="text-sm text-ink/60 hover:text-plum"
-                  >
-                    Budget: {settings.currency}
-                    {budget.toLocaleString()}
-                    {oneTime && <span className="text-amber-600"> (this month)</span>}
-                  </button>
-                )}
-              </div>
-              <div className="h-2.5 rounded-full bg-mist overflow-hidden">
-                <div
-                  className={`h-full ${barColor} transition-all`}
-                  style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
-                />
-              </div>
-              <div className="flex items-center justify-between mt-1.5 text-xs text-ink/60">
-                <span>
-                  Spent {settings.currency}
-                  {spent.toLocaleString()}
-                </span>
-                <span className={statusText.includes("over") ? "text-red-500 font-medium" : ""}>
-                  {statusText}
-                </span>
-              </div>
-            </Card>
+              category={c}
+              budget={budget}
+              oneTime={oneTime}
+              spent={spent}
+              pct={pct}
+              barColor={barColor}
+              statusText={statusText}
+              currency={settings.currency}
+              isEditing={editingId === c.id}
+              editValue={editValue}
+              editRecurring={editRecurring}
+              onStartEdit={() => startEdit(c)}
+              onChangeEditValue={setEditValue}
+              onChangeEditRecurring={setEditRecurring}
+              onSaveEdit={() => saveEdit(c.id)}
+            />
           );
         })}
-      </div>
+      </ul>
 
       <Pagination page={page} pageSize={PAGE_SIZE} total={categories.length} onPageChange={setPage} />
     </div>

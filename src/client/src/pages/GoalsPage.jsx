@@ -3,6 +3,7 @@ import { Plus, Trash2, Target, PiggyBank, PartyPopper } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { fromInputDate } from "../lib/month.js";
 import Card from "../components/Card.jsx";
+import FinanceIllustration from "../components/illustrations/FinanceIllustration.jsx";
 
 export default function GoalsPage() {
   const { expenses, categories, goals, settings, addGoal, updateGoal, removeGoal } = useData();
@@ -63,6 +64,8 @@ export default function GoalsPage() {
 
   return (
     <div className="space-y-5">
+      <FinanceIllustration type="goals" size={110} className="hidden sm:block" />
+
       <Card>
         <h2 className="font-bold text-lg mb-3 flex items-center gap-1.5">
           <PiggyBank size={18} className="text-coral" /> New savings goal
@@ -116,10 +119,27 @@ export default function GoalsPage() {
 
       {goals.length === 0 ? (
         <Card>
-          <p className="text-ink/50 text-sm py-6 text-center">No savings goals yet — add one above.</p>
+          <div className="flex flex-col items-center gap-3 py-2 text-center">
+            <FinanceIllustration type="goals" size={110} className="w-full max-w-[220px]" />
+            <p className="text-ink/50 text-sm">No savings goals yet — add one above.</p>
+          </div>
         </Card>
       ) : (
         <div className="grid sm:grid-cols-2 gap-4">
+          {goals.some((g) => {
+            const progress = progressByGoal[g._id] || 0;
+            return g.targetAmount > 0 && progress >= g.targetAmount;
+          }) && (
+            <Card className="sm:col-span-2 border-gold/40 bg-gold/[0.05]">
+              <div className="flex items-center gap-4">
+                <FinanceIllustration type="goalReached" size={72} className="w-24 h-[72px] shrink-0" />
+                <div>
+                  <h3 className="font-display font-bold text-ink">Nice work — a goal is fully funded!</h3>
+                  <p className="text-sm text-ink/55 mt-0.5">Keep the momentum going on the rest below.</p>
+                </div>
+              </div>
+            </Card>
+          )}
           {goals.map((g, idx) => {
             const progress = progressByGoal[g._id] || 0;
             const pct = g.targetAmount > 0 ? Math.min(100, (progress / g.targetAmount) * 100) : 0;

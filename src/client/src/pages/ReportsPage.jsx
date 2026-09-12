@@ -1,8 +1,12 @@
 import { useMemo } from "react";
-import { TrendingUp, TrendingDown, Sparkles } from "lucide-react";
+import { TrendingUp, TrendingDown, Sparkles, PiggyBank } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
+import { useMonth } from "../context/MonthContext.jsx";
+import { buildMonthlyTrends } from "../lib/trends.js";
 import Card from "../components/Card.jsx";
 import CategoryBadge from "../components/CategoryBadge.jsx";
+import FinanceIllustration from "../components/illustrations/FinanceIllustration.jsx";
+import { IncomeExpenseTrendChart, SavingsInvestmentTrendChart } from "../components/TrendCharts.jsx";
 
 // Money moved into an Investment/Savings-flavored category isn't "spent" —
 // it's still yours, just in a different form — so it's excluded from
@@ -12,8 +16,9 @@ function isWealthCategory(category) {
   return text.includes("invest") || text.includes("saving");
 }
 
-export default function NetWorthPage() {
+export default function ReportsPage() {
   const { expenses, income, categories, settings } = useData();
+  const { selectedMonth } = useMonth();
 
   const categoryById = useMemo(() => {
     const map = {};
@@ -35,6 +40,8 @@ export default function NetWorthPage() {
     return { totalIncome, spending, investedAndSaved, netWorth: totalIncome - spending };
   }, [expenses, income, categoryById]);
 
+  const savingsRate = totals.totalIncome > 0 ? (totals.investedAndSaved / totals.totalIncome) * 100 : 0;
+
   const wealthByCategory = useMemo(() => {
     const map = {};
     for (const e of expenses) {
@@ -48,23 +55,23 @@ export default function NetWorthPage() {
       .sort((a, b) => b.total - a.total);
   }, [expenses, categoryById]);
 
+  const trendData = useMemo(() => buildMonthlyTrends(expenses, income, selectedMonth, 6), [expenses, income, selectedMonth]);
+
   const fmt = (n) => `${settings.currency}${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 
   return (
     <div className="space-y-5">
-      <Card className="text-center">
-        <p className="text-xs text-ink/50 uppercase">Net worth</p>
-        <p className={`font-display font-bold text-4xl ${totals.netWorth >= 0 ? "text-teal" : "text-coral"}`}>
-          {totals.netWorth < 0 ? "-" : ""}
-          {fmt(Math.abs(totals.netWorth))}
-        </p>
-        <p className="text-xs text-ink/40 mt-1.5 max-w-xs mx-auto">
-          Everything you've earned, minus everyday spending. Money in your Investment and Savings
-          categories always counts toward this — it's never treated as spent.
-        </p>
-      </Card>
+      <FinanceIllustration type="reports" size={120} />
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-3 gap-4">
+        <Card className="text-center">
+          <p className="text-xs text-ink/50 uppercase">Net worth</p>
+          <p className={`font-display font-bold text-3xl ${totals.netWorth >= 0 ? "text-teal" : "text-coral"}`}>
+            {totals.netWorth < 0 ? "-" : ""}
+            {fmt(Math.abs(totals.netWorth))}
+          </p>
+          <p className="text-xs text-ink/40 mt-1.5">Earned minus everyday spending, all time</p>
+        </Card>
         <Card>
           <p className="text-xs text-ink/50 uppercase mb-1">Total income, all time</p>
           <p className="font-display font-bold text-xl text-teal flex items-center gap-1.5">
@@ -72,11 +79,17 @@ export default function NetWorthPage() {
           </p>
         </Card>
         <Card>
-          <p className="text-xs text-ink/50 uppercase mb-1">Everyday spending, all time</p>
-          <p className="font-display font-bold text-xl text-coral flex items-center gap-1.5">
-            <TrendingDown size={18} /> {fmt(totals.spending)}
+          <p className="text-xs text-ink/50 uppercase mb-1">Savings rate</p>
+          <p className="font-display font-bold text-xl text-forest flex items-center gap-1.5">
+            <PiggyBank size={18} /> {savingsRate.toFixed(0)}%
           </p>
+          <p className="text-xs text-ink/40 mt-0.5">Of all-time income invested or saved</p>
         </Card>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <IncomeExpenseTrendChart data={trendData} currency={settings.currency} />
+        <SavingsInvestmentTrendChart data={trendData} currency={settings.currency} />
       </div>
 
       <Card>

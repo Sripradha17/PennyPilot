@@ -1,49 +1,18 @@
 import { useEffect, useState } from "react";
-import { DataProvider, useData } from "./context/DataContext.jsx";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { DataProvider } from "./context/DataContext.jsx";
 import { MonthProvider } from "./context/MonthContext.jsx";
 import { getToken, clearToken } from "./lib/api.js";
-import Header from "./components/Header.jsx";
-import TabBar from "./components/TabBar.jsx";
+import AppShell from "./components/layout/AppShell.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
+import HomePage from "./pages/HomePage.jsx";
 import OverviewPage from "./pages/OverviewPage.jsx";
 import ExpensesPage from "./pages/ExpensesPage.jsx";
 import IncomePage from "./pages/IncomePage.jsx";
 import BudgetsPage from "./pages/BudgetsPage.jsx";
 import GoalsPage from "./pages/GoalsPage.jsx";
-import NetWorthPage from "./pages/NetWorthPage.jsx";
+import ReportsPage from "./pages/ReportsPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
-
-function AppShell({ onLogout }) {
-  const [tab, setTab] = useState("overview");
-  const { loading, error } = useData();
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Header onLogout={onLogout} />
-      <TabBar active={tab} onChange={setTab} />
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-5">
-        {error && (
-          <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2 text-sm">
-            {error}
-          </div>
-        )}
-        {loading ? (
-          <p className="text-center text-ink/50 py-10">Loading your finances…</p>
-        ) : (
-          <div key={tab} className="animate-page-in">
-            {tab === "overview" && <OverviewPage />}
-            {tab === "expenses" && <ExpensesPage />}
-            {tab === "income" && <IncomePage />}
-            {tab === "budgets" && <BudgetsPage />}
-            {tab === "goals" && <GoalsPage />}
-            {tab === "networth" && <NetWorthPage />}
-            {tab === "settings" && <SettingsPage onLogout={onLogout} />}
-          </div>
-        )}
-      </main>
-    </div>
-  );
-}
 
 export default function App() {
   const [authed, setAuthed] = useState(() => !!getToken());
@@ -61,10 +30,24 @@ export default function App() {
     return <LoginPage onLoggedIn={() => setAuthed(true)} />;
   }
 
+  const onLogout = () => setAuthed(false);
+
   return (
     <DataProvider>
       <MonthProvider>
-        <AppShell onLogout={() => setAuthed(false)} />
+        <Routes>
+          <Route element={<AppShell onLogout={onLogout} />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/overview" element={<OverviewPage />} />
+            <Route path="/expenses" element={<ExpensesPage />} />
+            <Route path="/income" element={<IncomePage />} />
+            <Route path="/budget" element={<BudgetsPage />} />
+            <Route path="/goals" element={<GoalsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/settings" element={<SettingsPage onLogout={onLogout} />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
       </MonthProvider>
     </DataProvider>
   );

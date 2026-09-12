@@ -5,6 +5,7 @@ import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey, toInputDate, fromInputDate } from "../lib/month.js";
 import { useUndoDelete } from "../hooks/useUndoDelete.js";
 import Card from "../components/Card.jsx";
+import FinanceIllustration from "../components/illustrations/FinanceIllustration.jsx";
 import Pagination from "../components/Pagination.jsx";
 import UndoToast from "../components/UndoToast.jsx";
 
@@ -85,6 +86,8 @@ export default function IncomePage() {
 
   return (
     <div className="space-y-5">
+      <FinanceIllustration type="income" size={110} className="hidden sm:block" />
+
       <div className="grid grid-cols-3 gap-3">
         <IncomeStatCard label={settings.myLabel} value={fmt(totals.mine)} icon={Wallet} tone="teal" />
         <IncomeStatCard label={settings.spouseLabel} value={fmt(totals.spouse)} icon={Wallet} tone="teal" />

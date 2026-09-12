@@ -24,6 +24,7 @@ import { getMissingRecurringForMonth } from "../lib/recurring.js";
 import { useUndoDelete } from "../hooks/useUndoDelete.js";
 import { fetchExchangeRate, CURRENCIES } from "../lib/currency.js";
 import Card from "../components/Card.jsx";
+import FinanceIllustration from "../components/illustrations/FinanceIllustration.jsx";
 import CategoryChipPicker from "../components/CategoryChipPicker.jsx";
 import StatTile from "../components/StatTile.jsx";
 import ImportExpenses from "../components/ImportExpenses.jsx";
@@ -251,6 +252,8 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-5">
+      <FinanceIllustration type="expenses" size={110} className="hidden sm:block" />
+
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <StatTile label="Income" value={fmt(totals.income)} icon={TrendingUp} tone="sky" />
         <StatTile label="Expenses" value={fmt(totals.expenses)} icon={TrendingDown} tone="coral" />
@@ -489,7 +492,10 @@ export default function ExpensesPage() {
         )}
 
         {monthExpenses.length === 0 ? (
-          <p className="text-ink/50 text-sm py-6 text-center">No expenses logged yet.</p>
+          <div className="flex flex-col items-center gap-3 py-4 text-center">
+            <FinanceIllustration type="emptyExpenses" size={110} className="w-full max-w-[220px]" />
+            <p className="text-ink/50 text-sm">No expenses logged yet — add one above to get started.</p>
+          </div>
         ) : visibleExpenses.length === 0 ? (
           <p className="text-ink/50 text-sm py-6 text-center">No expenses match your search/filters.</p>
         ) : dayGroups ? (
