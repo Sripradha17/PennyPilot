@@ -3,35 +3,34 @@
 @tailwind utilities;
 
 :root {
-  /* Tells the browser to draw native widgets (date-picker icon, scrollbars, etc.)
-     with light-on-dark styling instead of defaulting to a light-theme look. */
-  color-scheme: dark;
+  color-scheme: light;
+  --nav-sidebar-w: 264px;
+  --bottom-nav-h: 64px;
 }
 
-/* Soft, organic color blobs behind the whole app instead of a flat void —
-   muted (never neon/fluorescent), fixed so they don't scroll with content. */
 body {
-  background-color: #030303;
-  background-image:
-    radial-gradient(circle 620px at 8% 6%, rgba(201, 119, 107, 0.16), transparent 70%),
-    radial-gradient(circle 560px at 95% 10%, rgba(74, 145, 134, 0.15), transparent 70%),
-    radial-gradient(circle 640px at 15% 92%, rgba(138, 118, 172, 0.12), transparent 70%),
-    radial-gradient(circle 520px at 100% 88%, rgba(201, 154, 82, 0.10), transparent 70%);
-  background-attachment: fixed;
-  color: #e6e5ea;
+  background-color: #F6F6F1;
+  color: #20241F;
   @apply font-body;
+}
+
+#root {
+  min-height: 100vh;
 }
 
 h1, h2, h3, h4 {
   @apply font-display;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 input, select, textarea {
-  background-color: #1d1d23;
-  color: #e6e5ea;
+  background-color: #ffffff;
+  color: #20241F;
+  font-family: inherit;
 }
 input::placeholder, textarea::placeholder {
-  color: #6b6b76;
+  color: #9AA095;
 }
 
 ::-webkit-scrollbar {
@@ -39,12 +38,10 @@ input::placeholder, textarea::placeholder {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #35353f;
+  background: rgba(43, 95, 71, 0.22);
   border-radius: 8px;
 }
 
-/* Give every button a consistent, tactile feel without having to touch each
-   component: a quick press-down on click, smooth transitions on hover/focus. */
 button:not(:disabled) {
   transition: transform 120ms ease, box-shadow 150ms ease, background-color 150ms ease,
     border-color 150ms ease, opacity 150ms ease, color 150ms ease;
@@ -60,68 +57,101 @@ input[type="checkbox"] {
     opacity 150ms ease;
 }
 
+/* ---------- Page / modal transitions ---------- */
+
 @keyframes modal-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 @keyframes backdrop-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-.animate-modal-in {
-  animation: modal-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-.animate-backdrop-in {
-  animation: backdrop-in 150ms ease-out;
-}
+.animate-modal-in { animation: modal-in 180ms cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-backdrop-in { animation: backdrop-in 150ms ease-out; }
 
 @keyframes page-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-.animate-page-in {
-  animation: page-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
-}
+.animate-page-in { animation: page-in 220ms cubic-bezier(0.16, 1, 0.3, 1); }
 
 @keyframes slide-in {
-  from {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
 }
-.animate-slide-in {
-  animation: slide-in 320ms cubic-bezier(0.16, 1, 0.3, 1);
-}
+.animate-slide-in { animation: slide-in 320ms cubic-bezier(0.16, 1, 0.3, 1); }
 
-/* Scroll-shadow hint for horizontally-scrollable tables: fades in a shadow on
-   whichever edge still has more content, purely from scroll position (no JS). */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(-2deg); }
+}
+.animate-float-slow { animation: float-slow 4.6s ease-in-out infinite; }
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-bob { animation: bob 2.8s ease-in-out infinite; }
+
+/* ---------- Mascot animation primitives ---------- */
+
+@keyframes raccoon-breathe {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.015); }
+}
+.raccoon-breathe { animation: raccoon-breathe 3.4s ease-in-out infinite; transform-origin: 50% 100%; }
+
+@keyframes raccoon-tail-sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(7deg); }
+}
+.raccoon-tail { animation: raccoon-tail-sway 2.6s ease-in-out infinite; transform-origin: 85% 15%; }
+
+@keyframes raccoon-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.08); }
+}
+.raccoon-eye { animation: raccoon-blink 4.4s ease-in-out infinite; transform-origin: 50% 50%; }
+
+@keyframes raccoon-paw-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(-4deg); }
+}
+.raccoon-paw { animation: raccoon-paw-bob 2.2s ease-in-out infinite; transform-origin: top center; }
+
+@keyframes coin-bounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-7px) rotate(10deg); }
+}
+.animate-coin-bounce { animation: coin-bounce 2.4s ease-in-out infinite; }
+
+@keyframes coin-drop {
+  0% { transform: translateY(-14px); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.animate-coin-drop { animation: coin-drop 900ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+@keyframes sparkle-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+.animate-sparkle { animation: sparkle-pulse 2.2s ease-in-out infinite; }
+
+@keyframes progress-fill {
+  from { width: 0%; }
+}
+.animate-progress-fill { animation: progress-fill 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Scroll-shadow hint for horizontally-scrollable strips */
 .scroll-fade-x {
-  background: linear-gradient(to right, #151519 30%, rgba(21, 21, 25, 0)),
-    linear-gradient(to right, rgba(21, 21, 25, 0), #151519 70%) 100% 0,
-    linear-gradient(to right, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0)),
-    linear-gradient(to left, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0)) 100% 0;
+  background: linear-gradient(to right, #FFFFFF 30%, rgba(255, 255, 255, 0)),
+    linear-gradient(to right, rgba(255, 255, 255, 0), #FFFFFF 70%) 100% 0,
+    linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0)),
+    linear-gradient(to left, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0)) 100% 0;
   background-repeat: no-repeat;
-  background-color: #151519;
+  background-color: #FFFFFF;
   background-size: 24px 100%, 24px 100%, 10px 100%, 10px 100%;
   background-attachment: local, local, scroll, scroll;
 }
@@ -133,11 +163,27 @@ input[type="checkbox"] {
   input[type="checkbox"],
   .animate-modal-in,
   .animate-backdrop-in,
-  .animate-page-in {
+  .animate-page-in,
+  .animate-slide-in,
+  .animate-float-slow,
+  .animate-bob,
+  .raccoon-breathe,
+  .raccoon-tail,
+  .raccoon-eye,
+  .raccoon-paw,
+  .animate-coin-bounce,
+  .animate-coin-drop,
+  .animate-sparkle {
     animation: none !important;
     transition: none !important;
   }
   button:not(:disabled):active {
     transform: none;
+  }
+}
+
+@media (max-height: 820px) {
+  .auth-carousel {
+    display: none;
   }
 }

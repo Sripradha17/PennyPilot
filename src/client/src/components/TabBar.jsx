@@ -28,7 +28,7 @@ export default function TabBar({ active, onChange }) {
   }, []);
 
   return (
-    <nav className="sticky top-[64px] sm:top-[60px] z-10 bg-surface border-b border-mist shadow-sm">
+    <nav className="sticky top-[72px] sm:top-[72px] z-10 bg-surface/90 border-b border-white/60 shadow-sm backdrop-blur">
       <div
         ref={scrollRef}
         onScroll={updateFade}

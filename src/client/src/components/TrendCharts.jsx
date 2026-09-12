@@ -13,14 +13,14 @@ import {
 import Card from "./Card.jsx";
 
 const COLORS = {
-  income: "#4a9186",
-  expenses: "#c9776b",
-  savings: "#c99a52",
-  investment: "#8a76ac",
+  income: "#6fb3e6",
+  expenses: "#ff9a76",
+  savings: "#f8ca63",
+  investment: "#c292ff",
 };
-const GRID_COLOR = "#2d2d36";
-const AXIS_TICK = { fontSize: 12, fill: "#8b8b96" };
-const LEGEND_STYLE = { fontSize: 12, color: "#b8b8c2" };
+const GRID_COLOR = "#eadcf3";
+const AXIS_TICK = { fontSize: 12, fill: "#9b8ea3" };
+const LEGEND_STYLE = { fontSize: 12, color: "#7d6a89" };
 
 function CurrencyTooltip({ active, payload, label, currency }) {
   if (!active || !payload?.length) return null;

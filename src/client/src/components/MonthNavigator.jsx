@@ -8,7 +8,7 @@ export default function MonthNavigator() {
     <div className="flex items-center gap-2">
       <button
         onClick={goToPrevMonth}
-        className="rounded-full p-1.5 hover:bg-white/20 transition"
+        className="rounded-full bg-white/80 p-1.5 hover:bg-white transition"
         aria-label="Previous month"
       >
         <ChevronLeft size={20} />
@@ -26,7 +26,7 @@ export default function MonthNavigator() {
       </div>
       <button
         onClick={goToNextMonth}
-        className="rounded-full p-1.5 hover:bg-white/20 transition"
+        className="rounded-full bg-white/80 p-1.5 hover:bg-white transition"
         aria-label="Next month"
       >
         <ChevronRight size={20} />

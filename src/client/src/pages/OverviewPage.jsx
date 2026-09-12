@@ -1,19 +1,37 @@
 import { useMemo } from "react";
-import { Download, TrendingUp, TrendingDown, Sparkles, LayoutDashboard, PieChart } from "lucide-react";
+import { Download, TrendingUp, TrendingDown, Sparkles, PieChart, Wallet, PiggyBank } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
 import { monthKey } from "../lib/month.js";
 import { buildMonthlyTrends } from "../lib/trends.js";
 import { buildInsights } from "../lib/insights.js";
+import { getEffectiveBudget } from "../lib/budgets.js";
 import Card from "../components/Card.jsx";
-import CategoryBadge from "../components/CategoryBadge.jsx";
+import SafeToSpendCard from "../components/SafeToSpendCard.jsx";
+import StatTile from "../components/StatTile.jsx";
+import BudgetOverviewCard from "../components/BudgetOverviewCard.jsx";
+import RecentActivity from "../components/RecentActivity.jsx";
+import CategoryTile from "../components/CategoryTile.jsx";
 import MoneyFactCard from "../components/MoneyFactCard.jsx";
 import { IncomeExpenseTrendChart, SavingsInvestmentTrendChart } from "../components/TrendCharts.jsx";
 import { exportMonthToExcel } from "../lib/exportExcel.js";
 
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
 export default function OverviewPage() {
   const { expenses, income, categories, settings } = useData();
   const { selectedMonth, key } = useMonth();
+
+  const categoryById = useMemo(() => {
+    const map = {};
+    categories.forEach((c) => (map[c.id] = c));
+    return map;
+  }, [categories]);
 
   const monthExpenses = useMemo(
     () => expenses.filter((e) => monthKey(new Date(e.date)) === key),
@@ -24,18 +42,26 @@ export default function OverviewPage() {
     [income, key]
   );
 
-  const byCategory = useMemo(() => {
+  const spentByCategory = useMemo(() => {
     const map = {};
     monthExpenses.forEach((e) => {
       map[e.category] = (map[e.category] || 0) + e.amount;
     });
-    return Object.entries(map)
-      .map(([id, total]) => ({ category: categories.find((c) => c.id === id), total }))
+    return map;
+  }, [monthExpenses]);
+
+  const byCategory = useMemo(() => {
+    return Object.entries(spentByCategory)
+      .map(([id, total]) => ({ category: categoryById[id], total }))
       .filter((row) => row.category)
       .sort((a, b) => b.total - a.total);
-  }, [monthExpenses, categories]);
+  }, [spentByCategory, categoryById]);
 
   const totalExpenses = monthExpenses.reduce((s, e) => s + e.amount, 0);
+  const totalIncome = monthIncome.reduce((s, i) => s + i.amount, 0);
+  const savingsThisMonth = monthExpenses
+    .filter((e) => categoryById[e.category]?.isFloorGoal)
+    .reduce((s, e) => s + e.amount, 0);
   const maxTotal = byCategory[0]?.total || 1;
 
   const trendData = useMemo(
@@ -43,7 +69,44 @@ export default function OverviewPage() {
     [expenses, income, selectedMonth]
   );
 
+  const currentBalance = trendData[trendData.length - 1]?.balance ?? totalIncome - totalExpenses;
+  const prevBalance = trendData[trendData.length - 2]?.balance ?? null;
+  const balanceChangePct =
+    prevBalance && prevBalance !== 0 ? ((currentBalance - prevBalance) / Math.abs(prevBalance)) * 100 : null;
+
+  const budgetRows = useMemo(() => {
+    return categories
+      .map((c) => ({ category: c, budget: getEffectiveBudget(settings, c.id, key), spent: spentByCategory[c.id] || 0 }))
+      .filter((r) => r.budget > 0)
+      .sort((a, b) => b.spent / b.budget - a.spent / a.budget);
+  }, [categories, settings, key, spentByCategory]);
+  const totalBudget = budgetRows.reduce((s, r) => s + r.budget, 0);
+  const totalBudgetSpent = budgetRows.reduce((s, r) => s + r.spent, 0);
+
+  const recentActivity = useMemo(() => {
+    const expenseItems = monthExpenses.map((e) => ({
+      id: e._id,
+      type: "expense",
+      date: e.date,
+      amount: e.amount,
+      label: e.note || categoryById[e.category]?.label || "Expense",
+      subtitle: categoryById[e.category]?.label || "",
+      color: categoryById[e.category]?.badgeColor,
+    }));
+    const incomeItems = monthIncome.map((i) => ({
+      id: i._id,
+      type: "income",
+      date: i.date,
+      amount: i.amount,
+      label: i.note || (i.person === "spouse" ? settings.spouseLabel : settings.myLabel),
+      subtitle: "Income",
+    }));
+    return [...expenseItems, ...incomeItems].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
+  }, [monthExpenses, monthIncome, categoryById, settings]);
+
   const insights = useMemo(() => buildInsights(expenses, categories, key), [expenses, categories, key]);
+
+  const fmt = (n) => `${settings.currency}${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
   function handleExport() {
     exportMonthToExcel({
@@ -58,24 +121,45 @@ export default function OverviewPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <h2 className="font-bold text-lg flex items-center gap-1.5">
-          <LayoutDashboard size={18} className="text-coral" /> Overview
-        </h2>
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-extrabold text-ink sm:text-[1.7rem]">
+            {greeting()}, {settings.myLabel} 👋
+          </h1>
+          <p className="mt-0.5 text-sm text-ink/55">Here's how your money is doing.</p>
+        </div>
         <button
           onClick={handleExport}
-          className="flex items-center gap-1.5 rounded-lg bg-plum text-white text-sm font-medium px-3 py-2 hover:bg-plum/90 hover:shadow-[0_0_0_3px_rgba(138,118,172,0.25)]"
+          className="hidden items-center gap-1.5 rounded-lg bg-plum text-white text-sm font-medium px-3 py-2 hover:bg-plum/90 hover:shadow-[0_0_0_3px_rgba(138,118,172,0.25)] sm:flex"
         >
-          <Download size={16} /> Export to Excel
+          <Download size={16} /> Export
         </button>
       </div>
 
-      <MoneyFactCard />
+      <SafeToSpendCard amount={currentBalance} currency={settings.currency} changePct={balanceChangePct} />
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+        <StatTile label="Income" value={fmt(totalIncome)} icon={Wallet} tone="sky" />
+        <StatTile label="Expenses" value={fmt(totalExpenses)} icon={TrendingDown} tone="coral" />
+        <StatTile label="Savings" value={fmt(savingsThisMonth)} icon={PiggyBank} tone="forest" className="col-span-2 sm:col-span-1" />
+      </div>
+
+      <div className="grid lg:grid-cols-[1.1fr_1fr] gap-4">
+        <BudgetOverviewCard
+          rows={budgetRows}
+          totalBudget={totalBudget}
+          totalSpent={totalBudgetSpent}
+          currency={settings.currency}
+        />
+        <RecentActivity items={recentActivity} currency={settings.currency} />
+      </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <IncomeExpenseTrendChart data={trendData} currency={settings.currency} />
         <SavingsInvestmentTrendChart data={trendData} currency={settings.currency} />
       </div>
+
+      <MoneyFactCard />
 
       {insights.hasPrevData && (insights.changes.length > 0 || insights.totalPct !== null) && (
         <Card>
@@ -151,39 +235,28 @@ export default function OverviewPage() {
       <h2 className="font-bold text-lg flex items-center gap-1.5">
         <PieChart size={18} className="text-plum" /> This month's category breakdown
       </h2>
-      <Card>
-        {byCategory.length === 0 ? (
+      {byCategory.length === 0 ? (
+        <Card>
           <p className="text-ink/50 text-sm py-6 text-center">
             No expenses yet this month — log one to see your breakdown.
           </p>
-        ) : (
-          <ul className="space-y-3.5">
-            {byCategory.map(({ category, total }, idx) => (
-              <li key={category.id} className="animate-page-in" style={{ animationDelay: `${idx * 35}ms` }}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <CategoryBadge category={category} />
-                  <span className="text-sm font-semibold tabular-nums">
-                    {settings.currency}
-                    {total.toLocaleString(undefined, { maximumFractionDigits: 2 })}{" "}
-                    <span className="text-ink/40 font-normal">
-                      ({totalExpenses > 0 ? ((total / totalExpenses) * 100).toFixed(2) : "0.00"}%)
-                    </span>
-                  </span>
-                </div>
-                <div className="h-2.5 rounded-full bg-mist overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-[width] duration-700 ease-out"
-                    style={{
-                      width: `${(total / maxTotal) * 100}%`,
-                      background: `linear-gradient(90deg, ${category.badgeColor}cc, ${category.badgeColor})`,
-                    }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {byCategory.map(({ category, total }, idx) => (
+            <CategoryTile
+              key={category.id}
+              category={category}
+              amount={total}
+              pct={totalExpenses > 0 ? (total / totalExpenses) * 100 : 0}
+              barPct={(total / maxTotal) * 100}
+              currency={settings.currency}
+              className="animate-page-in"
+              style={{ animationDelay: `${idx * 35}ms` }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

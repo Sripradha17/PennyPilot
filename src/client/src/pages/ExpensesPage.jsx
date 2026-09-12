@@ -14,6 +14,7 @@ import {
   Scale,
   Receipt as ReceiptIcon,
   Wallet,
+  MoreHorizontal,
 } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { useMonth } from "../context/MonthContext.jsx";
@@ -23,7 +24,8 @@ import { getMissingRecurringForMonth } from "../lib/recurring.js";
 import { useUndoDelete } from "../hooks/useUndoDelete.js";
 import { fetchExchangeRate, CURRENCIES } from "../lib/currency.js";
 import Card from "../components/Card.jsx";
-import CategoryBadge from "../components/CategoryBadge.jsx";
+import CategoryChipPicker from "../components/CategoryChipPicker.jsx";
+import StatTile from "../components/StatTile.jsx";
 import ImportExpenses from "../components/ImportExpenses.jsx";
 import DuplicateExpenses from "../components/DuplicateExpenses.jsx";
 import Pagination from "../components/Pagination.jsx";
@@ -249,32 +251,26 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-3 gap-3">
-        <StatCard
-          label="Income"
-          value={fmt(totals.income)}
-          icon={TrendingUp}
-          tone="teal"
-        />
-        <StatCard
-          label="Expenses"
-          value={fmt(totals.expenses)}
-          icon={TrendingDown}
-          tone="coral"
-        />
-        <StatCard
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatTile label="Income" value={fmt(totals.income)} icon={TrendingUp} tone="sky" />
+        <StatTile label="Expenses" value={fmt(totals.expenses)} icon={TrendingDown} tone="coral" />
+        <StatTile
           label="Difference"
           value={`${totals.diff < 0 ? "-" : ""}${fmt(Math.abs(totals.diff))}`}
           icon={Scale}
-          tone={totals.diff < 0 ? "coral" : "teal"}
+          tone={totals.diff < 0 ? "coral" : "forest"}
+          className="col-span-2 sm:col-span-1"
         />
       </div>
 
       <Card>
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <h2 className="font-bold text-lg flex items-center gap-1.5">
-            <Wallet size={18} className="text-coral" /> Log an expense
-          </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h2 className="font-bold text-lg flex items-center gap-1.5">
+              <Wallet size={18} className="text-coral" /> What did you spend?
+            </h2>
+            <p className="text-xs text-ink/45 mt-0.5">Log it in a few seconds — the raccoon keeps track of the rest.</p>
+          </div>
           <div className="flex items-center gap-3">
             {duplicateGroups.length > 0 && (
               <button
@@ -293,58 +289,80 @@ export default function ExpensesPage() {
             </button>
           </div>
         </div>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-6 gap-3">
-          <input
-            type="date"
-            value={form.date}
-            onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
-            required
-          />
-          <select
-            value={form.category}
-            onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
-          >
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-          <select
-            value={form.person}
-            onChange={(e) => setForm((f) => ({ ...f, person: e.target.value }))}
-            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
-          >
-            <option value="mine">{settings.myLabel}</option>
-            <option value="spouse">{settings.spouseLabel}</option>
-          </select>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder={`Amount (${settings.currency})`}
-            value={form.amount}
-            onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
-            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Note (optional)"
-            value={form.note}
-            onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
-            className="rounded-lg border border-mist px-3 py-2 text-sm focus:outline-coral"
-          />
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex items-center justify-center gap-1.5 rounded-lg bg-coral text-white font-medium px-3 py-2 text-sm hover:bg-coral/90 disabled:opacity-50"
-          >
-            <Plus size={16} /> Add
-          </button>
-          <label className="col-span-full flex items-center gap-1.5 text-xs text-ink/60 -mt-1">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid sm:grid-cols-[1.3fr_1fr] gap-3">
+            <label className="block">
+              <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.16em] text-ink/45">
+                Amount
+              </span>
+              <div className="flex items-center gap-2 rounded-2xl border-2 border-mist bg-white/85 px-4 py-2 focus-within:border-coral transition-colors">
+                <span className="text-2xl font-display font-extrabold text-ink/25">{settings.currency}</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  value={form.amount}
+                  onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
+                  className="min-w-0 flex-1 bg-transparent font-display text-2xl font-extrabold text-ink outline-none placeholder:text-ink/20"
+                  required
+                />
+              </div>
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.16em] text-ink/45">
+                Date
+              </span>
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                className="h-[54px] w-full rounded-2xl border-2 border-mist bg-white/85 px-4 text-sm focus:border-coral focus:outline-none"
+                required
+              />
+            </label>
+          </div>
+
+          <div>
+            <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.16em] text-ink/45">
+              Category
+            </span>
+            <CategoryChipPicker
+              categories={categories}
+              value={form.category}
+              onChange={(id) => setForm((f) => ({ ...f, category: id }))}
+            />
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <label className="block">
+              <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.16em] text-ink/45">
+                Note
+              </span>
+              <input
+                type="text"
+                placeholder="What was it for? (optional)"
+                value={form.note}
+                onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
+                className="w-full rounded-2xl border-2 border-mist bg-white/85 px-4 py-2.5 text-sm focus:border-coral focus:outline-none"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.16em] text-ink/45">
+                Paid by
+              </span>
+              <select
+                value={form.person}
+                onChange={(e) => setForm((f) => ({ ...f, person: e.target.value }))}
+                className="h-[46px] w-full rounded-2xl border-2 border-mist bg-white/85 px-4 text-sm focus:border-coral focus:outline-none"
+              >
+                <option value="mine">{settings.myLabel}</option>
+                <option value="spouse">{settings.spouseLabel}</option>
+              </select>
+            </label>
+          </div>
+
+          <label className="flex items-center gap-1.5 text-xs text-ink/60">
             <input
               type="checkbox"
               checked={form.isRecurring}
@@ -352,7 +370,7 @@ export default function ExpensesPage() {
             />
             <Repeat size={12} /> Repeats every month (same amount, same day) — I'll prompt you to add it in future months
           </label>
-          <div className="col-span-full flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             <label className="flex items-center gap-1.5 text-xs text-ink/60">
               <input
                 type="checkbox"
@@ -375,7 +393,15 @@ export default function ExpensesPage() {
               </select>
             )}
           </div>
-          {currencyError && <p className="col-span-full text-xs text-red-400">{currencyError}</p>}
+          {currencyError && <p className="text-xs text-red-400">{currencyError}</p>}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-[linear-gradient(90deg,#ff8e70,#ffb65e)] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-white shadow-[0_18px_28px_-20px_rgba(255,142,112,0.7)] hover:opacity-95 disabled:opacity-50 sm:w-auto"
+          >
+            <Plus size={16} /> {submitting ? "Adding…" : "Add expense"}
+          </button>
         </form>
       </Card>
 
@@ -566,32 +592,17 @@ export default function ExpensesPage() {
   );
 }
 
-function StatCard({ label, value, icon: Icon, tone }) {
-  const toneClasses = {
-    teal: { bg: "bg-teal/[0.07]", border: "border-teal/20", text: "text-teal", chip: "bg-teal/15" },
-    coral: { bg: "bg-coral/[0.07]", border: "border-coral/20", text: "text-coral", chip: "bg-coral/15" },
-  }[tone];
+function ExpenseRow({ expense: e, category, settings, showDate, onEdit, onDelete }) {
+  const Icon = category?.icon || MoreHorizontal;
+  const color = category?.badgeColor || "#7d8590";
   return (
-    <Card className={`${toneClasses.bg} border ${toneClasses.border} text-center relative overflow-hidden`}>
-      <div className={`mx-auto mb-1.5 flex items-center justify-center w-8 h-8 rounded-full ${toneClasses.chip} ${toneClasses.text}`}>
+    <li className="relative flex items-center gap-3 py-2.5 pl-3 pr-3 hover:bg-mist/40 transition-colors duration-150 group">
+      <div
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+        style={{ backgroundColor: `${color}22`, color }}
+      >
         <Icon size={15} />
       </div>
-      <p className="text-[11px] text-ink/50 uppercase tracking-wide">{label}</p>
-      <p key={value} className={`font-display font-bold text-lg tabular-nums animate-page-in ${toneClasses.text}`}>
-        {value}
-      </p>
-    </Card>
-  );
-}
-
-function ExpenseRow({ expense: e, category, settings, showDate, onEdit, onDelete }) {
-  return (
-    <li className="relative flex items-center gap-3 py-2.5 pl-4 pr-3 hover:bg-mist/40 transition-colors duration-150 group">
-      <span
-        className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full"
-        style={{ backgroundColor: category?.badgeColor || "#4a4a55" }}
-      />
-      <CategoryBadge category={category} />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-ink truncate flex items-center gap-1.5">
           {e.note || category?.label || "Expense"}
@@ -600,12 +611,14 @@ function ExpenseRow({ expense: e, category, settings, showDate, onEdit, onDelete
           )}
         </p>
         <p className="text-xs text-ink/50 truncate">
+          {category?.label}
           {showDate && (
             <>
-              {new Date(e.date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
               {" · "}
+              {new Date(e.date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
             </>
           )}
+          {" · "}
           {e.person === "spouse" ? settings.spouseLabel : settings.myLabel}
           {e.foreignCurrency && (
             <>
